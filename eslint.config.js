@@ -10,7 +10,7 @@ import globals from 'globals';
 export default [
   // Base JavaScript recommended config
   js.configs.recommended,
-  
+
   // TypeScript configuration
   {
     files: ['**/*.ts', '**/*.tsx'],

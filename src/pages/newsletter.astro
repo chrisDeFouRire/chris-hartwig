@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm';
+---
+
+<BaseLayout title="Subscribe to Vibe Software Engineering Newsletter" description="Weekly insights on AI coding tools and techniques">
+  <section class="hero">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-6">Join the AI Coding Revolution</h1>
+      <p class="text-xl text-gray-600 mb-10">
+        Get weekly insights on AI tools, techniques, and best practices delivered straight to your inbox.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="max-w-2xl mx-auto">
+      <div class="card p-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Subscribe to the Newsletter</h2>
+
+        <NewsletterForm />
+
+        <div class="mt-8 text-center">
+          <p class="text-gray-600 text-sm">
+            Join over <span class="font-semibold">1,248</span> developers already receiving insights on AI coding.
+          </p>
+          <div class="mt-4 flex justify-center space-x-2">
+            <div class="h-2 w-2 rounded-full bg-primary"></div>
+            <div class="h-2 w-2 rounded-full bg-primary/80"></div>
+            <div class="h-2 w-2 rounded-full bg-primary/60"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-gray-50">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-10">What You'll Get Each Week</h2>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">🤖</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">AI Tool Reviews</h3>
+          <p class="text-gray-600">In-depth reviews of the latest AI coding tools and how they can improve your workflow.</p>
+        </div>
+
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">💡</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Tutorials & Guides</h3>
+          <p class="text-gray-600">Practical hands-on tutorials showing you how to effectively use AI in your projects.</p>
+        </div>
+
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">📊</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Industry Insights</h3>
+          <p class="text-gray-600">Analysis of trends and developments in AI-assisted software development.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

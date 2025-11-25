@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const blogPosts = await getCollection('blog');
+---
+
+<BaseLayout title="Blog | Vibe Software Engineering" description="Insights, tutorials, and analysis on AI in software engineering">
+  <section class="section">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">AI Software Engineering Insights</h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Weekly articles on AI coding tools, techniques, and the future of software development.
+        </p>
+      </div>
+
+      <div class="space-y-8">
+        {blogPosts.map((post) => (
+          <article class="card p-6 hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="text-xl font-bold mb-2">
+                  <a href={`/blog/${post.slug}`} class="text-gray-900 hover:text-primary">
+                    {post.data.title}
+                  </a>
+                </h2>
+                <p class="text-gray-600 mb-4">{post.data.description}</p>
+
+                <div class="flex items-center text-sm text-gray-500">
+                  <span>{new Date(post.data.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <span class="mx-2">•</span>
+                  <span>{Math.ceil(post.body.length / 1000)} min read</span>
+                  <span class="mx-2">•</span>
+                  <span>By {post.data.author}</span>
+                </div>
+              </div>
+              <a href={`/blog/${post.slug}`} class="ml-4 text-primary font-medium flex-shrink-0">
+                Read →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="mt-12 text-center">
+        <a href="/newsletter" class="btn-primary inline-flex items-center">
+          Subscribe for Weekly Updates
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

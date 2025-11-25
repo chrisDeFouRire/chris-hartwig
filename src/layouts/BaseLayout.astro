@@ -2,8 +2,11 @@
 import '../styles/global.css';
 
 const {
-  title = 'Default Title',
-  description = 'A website built with Astro'
+  title = 'Vibe Software Engineering',
+  description = 'Exploring AI in Software Engineering',
+  showHeader = true,
+  showFooter = true,
+  withContainer = true
 } = Astro.props;
 ---
 
@@ -12,12 +15,104 @@ const {
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#5a4ae3" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gonecoding.dev/" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://gonecoding.dev/" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content="/og-image.jpg" />
+
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body>
-    <slot />
+  <body class="min-h-screen flex flex-col">
+    {showHeader && (
+      <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div class="container">
+          <div class="flex items-center justify-between h-16">
+            <a href="/" class="flex items-center space-x-2">
+              <span class="text-xl font-bold text-primary">Chris Hartwig</span>
+              <span class="sr-only">Vibe Software Engineering</span>
+            </a>
+
+            <nav class="hidden md:flex items-center space-x-8">
+              <a href="/" class="text-gray-600 hover:text-primary font-medium">Home</a>
+              <a href="/blog" class="text-gray-600 hover:text-primary font-medium">Blog</a>
+              <a href="/newsletter" class="text-gray-600 hover:text-primary font-medium">Newsletter</a>
+              <a href="/about" class="text-gray-600 hover:text-primary font-medium">About</a>
+            </nav>
+
+            <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+    )}
+
+    <main class={`${withContainer && 'container'} flex-grow`}>
+      <slot />
+    </main>
+
+    {showFooter && (
+      <footer class="border-t border-gray-200 bg-gray-50 mt-16">
+        <div class="container py-12">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="md:col-span-2">
+              <h3 class="text-lg font-bold text-gray-900 mb-4">Vibe Software Engineering</h3>
+              <p class="text-gray-600 max-w-md">
+                Exploring the intersection of AI and Software Engineering.
+                Weekly insights on AI coding tools, techniques, and best practices.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Navigation</h3>
+              <ul class="space-y-2">
+                <li><a href="/" class="text-gray-600 hover:text-primary">Home</a></li>
+                <li><a href="/blog" class="text-gray-600 hover:text-primary">Blog</a></li>
+                <li><a href="/newsletter" class="text-gray-600 hover:text-primary">Newsletter</a></li>
+                <li><a href="/about" class="text-gray-600 hover:text-primary">About</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Connect</h3>
+              <ul class="space-y-2">
+                <li><a href="https://www.linkedin.com/in/christophe-hartwig-ba228a5/" class="text-gray-600 hover:text-primary">LinkedIn</a></li>
+                <li><a href="https://twitter.com/GoneVibing" class="text-gray-600 hover:text-primary">Twitter</a></li>
+                <li><a href="https://github.com/chrisdefourire" class="text-gray-600 hover:text-primary">GitHub</a></li>
+                <li><a href="/newsletter" class="text-gray-600 hover:text-primary">Subscribe</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-200 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
+            <p>&copy; {new Date().getFullYear()} Gone Coding Ltd. All rights reserved.</p>
+            <div class="mt-4 md:mt-0">
+              <a href="/privacy" class="mr-4 hover:text-primary">Privacy Policy</a>
+              <a href="/terms" class="hover:text-primary">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    )}
   </body>
 </html>

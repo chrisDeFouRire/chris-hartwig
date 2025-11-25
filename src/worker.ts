@@ -1,33 +1,22 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import type { WorkerEnv } from './types/worker';
+import api from './api';
 
-// Create the Hono app
+// Create the main Hono app
 const app = new Hono<{ Bindings: WorkerEnv; }>();
 
-// Add CORS middleware
-app.use('*', cors());
-
-// Health check endpoint
-app.get('/health', (c) => {
-  return c.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
+// Mount the API routes under the /api prefix
+app.route('/api', api);
 
 // Main fetch handler that combines API routes and static asset serving
 export default {
   async fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> {
-    // Create a new Hono instance for this request
-    const apiRoutes = new Hono<{ Bindings: WorkerEnv; }>();
+    // Handle the request with the main app which includes both API and non-API routes
+    const response = await app.fetch(request, env, ctx);
 
-    // Mount the API routes
-    apiRoutes.route('/api', app);
-
-    // Try to handle the request with the API routes first
-    const apiResponse = await apiRoutes.fetch(request, env, ctx);
-
-    // If we get a 404 from the API routes and it's not an API request,
+    // If the response is a 404 and the request is not for an API endpoint,
     // try to serve static assets
-    if (apiResponse.status === 404 && !request.url.includes('/api')) {
+    if (response.status === 404 && !request.url.includes('/api')) {
       try {
         // Attempt to serve static assets from the ASSETS binding
         return await env.ASSETS.fetch(request);
@@ -37,6 +26,6 @@ export default {
       }
     }
 
-    return apiResponse;
+    return response;
   },
 }

@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About Chris Hartwig | Vibe Software Engineering" description="Learn more about Chris Hartwig, a backend engineer and entrepreneur specializing in devops and SSL/TLS technologies, exploring the intersection of AI and software engineering.">
+  <section class="hero">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-6">About Chris Hartwig</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Backend engineer, entrepreneur, and SSL expert exploring the intersection of AI and software engineering
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="max-w-4xl mx-auto">
+      <div class="grid md:grid-cols-3 gap-8 items-center mb-12">
+        <div class="md:col-span-1">
+          <img
+            src="/og-image.jpg"
+            alt="Chris Hartwig"
+            class="rounded-xl w-full h-64 object-cover"
+            width="400"
+            height="400"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <h2 class="text-2xl font-bold mb-4">Backend Engineer & Entrepreneur</h2>
+          <p class="text-gray-600 mb-4">
+            I'm Chris, a French developer who has been working remotely from abroad since 2014. 
+            My journey has taken me across multiple time zones (UTC-4 to UTC+8), from Martinique to 
+            Southeast Asia, always with a focus on backend engineering, devops, and SSL/TLS technologies.
+          </p>
+          <p class="text-gray-600">
+            I'm the founder of <a href="https://sslping.com" class="text-primary hover:underline">SSLping.com</a>, 
+            launched in 2015 and built into a popular service. I've also worked on gaming backend as a service 
+            projects like Xtralife and Geeo (both now open source).
+          </p>
+        </div>
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <h2 class="text-2xl font-bold mb-4">My Journey with Technology</h2>
+        <p>
+          With years of experience in backend engineering and devops, I've seen technology evolve 
+          dramatically. From managing distributed systems across continents to implementing security 
+          protocols, I've navigated the complexities of modern software development.
+        </p>
+
+        <p>
+          My focus has always been on the infrastructure and systems that power applications. 
+          From SSL/TLS expertise to gaming backend architectures, I've worked on the foundations 
+          that make digital experiences possible.
+        </p>
+
+        <h3 class="text-xl font-bold mt-6 mb-3">Exploring AI in Software Engineering</h3>
+        <p>
+          Today, I'm fascinated by how artificial intelligence is transforming software engineering.
+          As someone who has built complex backend systems, I'm particularly interested in how AI
+          tools are changing the way we design, build, and maintain software.
+        </p>
+
+        <p class="mb-3">
+          Through this blog, I share insights on:
+        </p>
+
+        <ul class="list-disc pl-6 text-gray-600 space-y-2">
+          <li>AI-assisted backend development and devops practices</li>
+          <li>The impact of AI on security implementations and SSL/TLS technologies</li>
+          <li>How AI tools enhance distributed system design and management</li>
+          <li>Practical applications of AI in real-world engineering scenarios</li>
+        </ul>
+
+        <h3 class="text-xl font-bold mt-6 mb-3">Remote Engineering & Distributed Systems</h3>
+        <p>
+          My experience building systems while working remotely across multiple countries has given 
+          me unique perspectives on distributed development workflows. I explore how AI tools can 
+          enhance collaboration and productivity for distributed engineering teams.
+        </p>
+      </div>
+
+      <div class="mt-12 bg-primary/5 p-6 rounded-lg">
+        <h3 class="font-bold text-lg text-gray-900 mb-2">Interested in AI in Software Engineering?</h3>
+        <p class="text-gray-600 mb-4">
+          Join my newsletter for weekly insights on how AI is transforming the field of software engineering.
+        </p>
+        <a href="/newsletter" class="btn-primary inline-flex items-center">
+          Subscribe to Newsletter
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-gray-50">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-10">Key Areas of Expertise</h2>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">⚙️</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Backend Engineering</h3>
+          <p class="text-gray-600">Designing and implementing scalable server-side systems and services.</p>
+        </div>
+        
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">🔒</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">SSL/TLS Security</h3>
+          <p class="text-gray-600">Expertise in secure communications and certificate management.</p>
+        </div>
+        
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">🌐</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">DevOps & Infrastructure</h3>
+          <p class="text-gray-600">Implementing efficient deployment and operational practices.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

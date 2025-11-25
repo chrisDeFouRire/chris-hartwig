@@ -1,0 +1,39 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+const { title, description, pubDate, author = 'Chris Hartwig', readingTime } = Astro.props;
+---
+
+<BaseLayout title={`${title} | Vibe Software Engineering`} description={description}>
+  <article class="max-w-3xl mx-auto py-8 md:py-16">
+    <header class="mb-10">
+      <div class="text-sm text-gray-500 mb-2">
+        {pubDate && new Date(pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        {readingTime && ` • ${readingTime} min read`}
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{title}</h1>
+      <div class="flex items-center">
+        <div class="text-gray-600">By {author}</div>
+      </div>
+    </header>
+
+    <div class="prose prose-lg max-w-none">
+      <slot />
+    </div>
+
+    <footer class="mt-12 pt-8 border-t border-gray-200">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div class="mb-4 md:mb-0">
+          <h3 class="font-bold text-gray-900 mb-2">Liked this post?</h3>
+          <p class="text-gray-600">Subscribe to get the latest AI coding insights delivered weekly.</p>
+        </div>
+        <a
+          href="/newsletter"
+          class="btn-primary inline-flex items-center justify-center px-6 py-3"
+        >
+          Subscribe to Newsletter
+        </a>
+      </div>
+    </footer>
+  </article>
+</BaseLayout>
