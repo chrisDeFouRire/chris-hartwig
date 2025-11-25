@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Counter from '../components/Counter.astro';
+---
+
+<BaseLayout title="My Astro Site" description="Built with Astro, React and Tailwind CSS">
+  <h1 class="text-4xl font-bold mb-4">Welcome to my Astro site</h1>
+  <p class="mb-6">This is a static website built with Astro, React 19, and Tailwind CSS 4</p>
+
+  <div class="bg-gray-100 p-6 rounded-lg">
+    <Counter />
+  </div>
+</BaseLayout>
