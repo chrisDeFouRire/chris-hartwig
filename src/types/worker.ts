@@ -3,7 +3,7 @@
 
 interface IWorkerEnv extends Env {
   POSTMARK_API_TOKEN: string;
-  CANONICAL_URL: string;
+  CANONICAL_URL: "https://chris-hartwig.com";
 }
 
 export type WorkerEnv = IWorkerEnv;

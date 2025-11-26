@@ -143,7 +143,7 @@ class MockD1Database {
 const mockEnv: WorkerEnv = {
   DB: new MockD1Database() as any, // Cast to any because MockD1Database doesn't fully implement D1Database interface
   POSTMARK_API_TOKEN: 'mock-postmark-token',
-  CANONICAL_URL: 'https://test.com',
+  CANONICAL_URL: 'https://chris-hartwig.com' as const,
   ASSETS: {
     fetch: vi.fn(),
     connect: vi.fn(),

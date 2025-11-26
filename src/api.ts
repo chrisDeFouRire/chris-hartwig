@@ -11,26 +11,46 @@ const api = new Hono<{ Bindings: WorkerEnv; }>();
 api.use('*', cors());
 
 // Initialize Postmark client
-const postmarkClient = (env: WorkerEnv) => new ServerClient(env.POSTMARK_API_TOKEN);
+const postmarkClient = (env: WorkerEnv) => {
+  if (!env.POSTMARK_API_TOKEN) {
+    throw new Error('POSTMARK_API_TOKEN is not configured');
+  }
+  return new ServerClient(env.POSTMARK_API_TOKEN);
+};
 
 // Function to send confirmation email
 async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken: string) {
-  const client = postmarkClient(env);
+  console.log('Initializing Postmark client');
+  let client;
+  try {
+    client = postmarkClient(env);
+    console.log('Postmark client initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize Postmark client:', error);
+    throw error;
+  }
 
   const confirmUrl = `${env.CANONICAL_URL}/confirm?token=${confirmToken}`;
+  console.log('Sending confirmation email to:', email, 'with URL:', confirmUrl);
 
-  await client.sendEmail({
-    From: 'chris@chris-hartwig.com', // Use your domain's noreply email
-    To: email,
-    Subject: 'Confirm your email subscription',
-    HtmlBody: `
-      <h2>Welcome to the newsletter!</h2>
-      <p>Please click the link below to confirm your email address:</p>
-      <p><a href="${confirmUrl}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
-      <p>If you didn't sign up for our newsletter, please ignore this email.</p>
-    `,
-    TextBody: `Welcome to the newsletter! Please click the following link to confirm your email address: ${confirmUrl}\n\nIf you didn't sign up for our newsletter, please ignore this email.`
-  });
+  try {
+    const result = await client.sendEmail({
+      From: 'chris@chris-hartwig.com', // Use your domain's noreply email
+      To: email,
+      Subject: 'Confirm your email subscription',
+      HtmlBody: `
+        <h2>Welcome to the newsletter!</h2>
+        <p>Please click the link below to confirm your email address:</p>
+        <p><a href="${confirmUrl}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
+        <p>If you didn't sign up for our newsletter, please ignore this email.</p>
+      `,
+      TextBody: `Welcome to the newsletter! Please click the following link to confirm your email address: ${confirmUrl}\n\nIf you didn't sign up for our newsletter, please ignore this email.`
+    });
+    console.log('Email sent successfully, result:', result);
+  } catch (error) {
+    console.error('Error sending email via Postmark:', error);
+    throw error;
+  }
 }
 
 // Health check endpoint
@@ -40,9 +60,19 @@ api.get('/health', (c) => {
 
 // Subscribe to newsletter
 api.post('/subscribe', async (c) => {
-  const { email } = await c.req.json();
+  let requestBody;
+  try {
+    requestBody = await c.req.json();
+  } catch (error) {
+    console.error('Failed to parse request JSON:', error);
+    return c.json({ message: 'Invalid JSON in request body' }, 400);
+  }
+
+  const { email } = requestBody;
 
   try {
+    console.log('Starting subscription process for email:', email);
+
     // Check if email is already subscribed to determine the appropriate message
     const existingSubscription = await c.env.DB.prepare(
       'SELECT unsubscribed_at, confirm_token FROM subscriptions WHERE email = ?'
@@ -55,28 +85,40 @@ api.post('/subscribe', async (c) => {
       }
     }
 
+    console.log('Calling subscribe function for email:', email);
     await subscribe(c.env.DB, email);
+    console.log('Subscribe function completed successfully');
 
     // Get the confirmation token for the newly created subscription
+    console.log('Getting subscription status for email:', email);
     const subscriptionStatus = await getSubscriptionStatus(c.env.DB, email);
+    console.log('Subscription status retrieved:', subscriptionStatus ? 'found' : 'not found');
+
     if (subscriptionStatus && subscriptionStatus.confirm_token) {
+      console.log('Attempting to send confirmation email');
       try {
         // Send confirmation email
         await sendConfirmationEmail(c.env, email, subscriptionStatus.confirm_token);
+        console.log('Confirmation email sent successfully');
       } catch (error) {
         console.error('Failed to send confirmation email:', error);
         // Don't fail the subscription if email sending fails; the user can still confirm later
       }
+    } else {
+      console.log('No confirmation token found, skipping email send');
     }
 
     return c.json({ message }, 200);
   } catch (error: unknown) {
+    console.error('Error in subscribe handler:', error);
+
     if (!(error instanceof SubscriptionError)) {
+      console.error('Non-SubscriptionError caught, returning 500:', error);
       return c.json({ message: 'Internal server error during subscription' }, 500);
     }
 
     // Log the error for debugging
-    console.log('Error caught in subscribe handler:', error?.name, error?.message);
+    console.log('SubscriptionError caught in subscribe handler:', error?.name, error?.message);
 
     if (error && typeof error === 'object') {
       if (error.name === 'ValidationError') {
