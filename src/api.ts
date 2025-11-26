@@ -19,7 +19,7 @@ const postmarkClient = (env: WorkerEnv) => {
 };
 
 // Function to send confirmation email
-async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken: string) {
+async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken: string, name?: string | null) {
   console.log('Initializing Postmark client');
   let client;
   try {
@@ -33,22 +33,25 @@ async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken
   const confirmUrl = `${env.CANONICAL_URL}/confirm?token=${confirmToken}`;
   console.log('Sending confirmation email to:', email, 'with URL:', confirmUrl);
 
+  const greeting = name ? `Hi ${name},` : 'Hi,';
+  const welcomeText = name ? `Welcome to the Vibe Software Engineering newsletter, ${name}!` : 'Welcome to the Vibe Software Engineering newsletter!';
+
   try {
     const result = await client.sendEmail({
       From: 'chris@chris-hartwig.com', // Use your domain's noreply email
       To: email,
       Subject: 'Confirm your email subscription',
       HtmlBody: `
-        <h2>Welcome to the Vibe Software Engineering newsletter!</h2>
+        <h2>${greeting}</h2>
+        <br/>
+        <p>${welcomeText}</p>
         <br/>
         <p>Please click the link below to confirm your email address:</p>
         <p><a href="${confirmUrl}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
         <br/>
         <p>If you didn't sign up for our newsletter, please ignore this email.</p>
       `,
-      TextBody: `Welcome to the Vibe Software Engineering newsletter!
-      \n\nPlease click the following link to confirm your email address: ${confirmUrl}
-      \n\nIf you didn't sign up for our newsletter, please ignore this email.`
+      TextBody: `${greeting}\n\n${welcomeText}\n\nPlease click the following link to confirm your email address: ${confirmUrl}\n\nIf you didn't sign up for our newsletter, please ignore this email.`
     });
     console.log('Email sent successfully, result:', result);
   } catch (error) {
@@ -72,7 +75,7 @@ api.post('/subscribe', async (c) => {
     return c.json({ message: 'Invalid JSON in request body' }, 400);
   }
 
-  const { email } = requestBody;
+  const { email, name } = requestBody;
 
   try {
     console.log('Starting subscription process for email:', email);
@@ -90,7 +93,7 @@ api.post('/subscribe', async (c) => {
     }
 
     console.log('Calling subscribe function for email:', email);
-    await subscribe(c.env.DB, email);
+    await subscribe(c.env.DB, email, name);
     console.log('Subscribe function completed successfully');
 
     // Get the confirmation token for the newly created subscription
@@ -102,7 +105,7 @@ api.post('/subscribe', async (c) => {
       console.log('Attempting to send confirmation email');
       try {
         // Send confirmation email
-        await sendConfirmationEmail(c.env, email, subscriptionStatus.confirm_token);
+        await sendConfirmationEmail(c.env, email, subscriptionStatus.confirm_token, subscriptionStatus.name);
         console.log('Confirmation email sent successfully');
       } catch (error) {
         console.error('Failed to send confirmation email:', error);

@@ -19,8 +19,9 @@ class MockD1Database {
       const email = bindArgs[0];
       const result = Array.from(this.data.values()).find(sub => sub.email === email);
       // If the query includes specific fields (like getSubscriptionStatus), return only those
-      if (query.includes('confirmed_at') || query.includes('confirm_token')) {
+      if (query.includes('confirmed_at') || query.includes('confirm_token') || query.includes('name')) {
         return result ? {
+          name: result.name,
           subscribed_at: result.subscribed_at,
           unsubscribed_at: result.unsubscribed_at,
           confirmed_at: result.confirmed_at,
@@ -48,11 +49,12 @@ class MockD1Database {
   private async executeRun(query: string, bindArgs: any[]): Promise<any> {
     // console.log('MockD1Database.executeRun:', query, bindArgs);
     if (query.includes('INSERT INTO subscriptions')) {
-      const [email, subscribed_at, number_of_issues_received, confirm_token] = bindArgs;
+      const [email, name, subscribed_at, number_of_issues_received, confirm_token] = bindArgs;
       const id = this.data.size + 1;
       this.data.set(email, {
         id,
         email,
+        name: name || null,
         subscribed_at,
         unsubscribed_at: null,
         confirmed_at: null,
@@ -63,7 +65,20 @@ class MockD1Database {
       return { meta: { changes: 1 } };
     } else if (query.includes('UPDATE subscriptions')) {
       // Logic for UPDATE based on query and bindArgs
-      if (query.includes('SET unsubscribed_at = NULL') && query.includes('confirm_token')) { // Re-subscribe with new confirm_token
+      if (query.includes('SET unsubscribed_at = NULL') && query.includes('confirm_token') && query.includes('name = ?')) { // Re-subscribe with new confirm_token and name
+        const [subscribed_at_re, confirm_token, name_re, email_re] = bindArgs;
+        const existing = this.data.get(email_re);
+        if (existing) {
+          existing.unsubscribed_at = null;
+          existing.subscribed_at = subscribed_at_re;
+          existing.number_of_issues_received = 0;
+          existing.confirmed_at = null; // Reset confirmation when re-subscribing
+          existing.confirm_token = confirm_token; // Update token
+          existing.name = name_re || null; // Update name
+          this.data.set(email_re, existing);
+          return { meta: { changes: 1 } };
+        }
+      } else if (query.includes('SET unsubscribed_at = NULL') && query.includes('confirm_token')) { // Re-subscribe with new confirm_token (fallback for old tests)
         const [subscribed_at_re, confirm_token, email_re] = bindArgs;
         const existing = this.data.get(email_re);
         if (existing) {
@@ -178,6 +193,22 @@ describe('Newsletter API', () => {
     const subscribed = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('test@example.com').first();
     expect(subscribed).not.toBeNull();
     expect(subscribed.email).toBe('test@example.com');
+    expect(subscribed.unsubscribed_at).toBeNull();
+  });
+
+  it('should subscribe a new email with name successfully', async () => {
+    const req = new Request('http://localhost/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'test-with-name@example.com', name: 'John Doe' }),
+    });
+    const res = await api.fetch(req, mockEnv);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ message: 'Successfully subscribed' });
+    const subscribed = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('test-with-name@example.com').first();
+    expect(subscribed).not.toBeNull();
+    expect(subscribed.email).toBe('test-with-name@example.com');
+    expect(subscribed.name).toBe('John Doe');
     expect(subscribed.unsubscribed_at).toBeNull();
   });
 

@@ -54,6 +54,7 @@ export interface ExistingSubscription {
 export interface SubscriptionRecord {
   id: number;
   email: string;
+  name: string | null;
   subscribed_at: number | null;
   unsubscribed_at: number | null;
   confirmed_at: number | null;
@@ -64,7 +65,7 @@ export interface SubscriptionRecord {
  * Subscribe an email to the newsletter
  * Handles both new subscriptions and re-subscriptions
  */
-export async function subscribe(db: D1Database, email: string): Promise<void> {
+export async function subscribe(db: D1Database, email: string, name?: string | null): Promise<void> {
   if (!email || !isValidEmail(email)) {
     throw new ValidationError('Invalid email address');
   }
@@ -81,17 +82,17 @@ export async function subscribe(db: D1Database, email: string): Promise<void> {
     if (existingSubscription.unsubscribed_at === null) {
       throw new ConflictError('Email already subscribed');
     } else {
-      // Re-subscribe: clear unsubscribed_at, update subscribed_at, reset issue count, generate new token
+      // Re-subscribe: clear unsubscribed_at, update subscribed_at, reset issue count, generate new token, update name
       await db.prepare(
-        'UPDATE subscriptions SET unsubscribed_at = NULL, subscribed_at = ?, number_of_issues_received = 0, confirmed_at = NULL, confirm_token = ? WHERE email = ?'
-      ).bind(now, confirmToken, email).run();
+        'UPDATE subscriptions SET unsubscribed_at = NULL, subscribed_at = ?, number_of_issues_received = 0, confirmed_at = NULL, confirm_token = ?, name = ? WHERE email = ?'
+      ).bind(now, confirmToken, name || null, email).run();
     }
   } else {
     try {
       // New subscription - only wrap the actual INSERT in try-catch
       await db.prepare(
-        'INSERT INTO subscriptions (email, subscribed_at, number_of_issues_received, confirm_token) VALUES (?, ?, ?, ?)'
-      ).bind(email, now, 0, confirmToken).run();
+        'INSERT INTO subscriptions (email, name, subscribed_at, number_of_issues_received, confirm_token) VALUES (?, ?, ?, ?, ?)'
+      ).bind(email, name || null, now, 0, confirmToken).run();
     } catch (error: unknown) {
       console.error('Subscription error:', error);
       // D1 unique constraint error for email
@@ -146,6 +147,7 @@ export async function unsubscribe(db: D1Database, email: string): Promise<void> 
  */
 export async function getSubscriptionStatus(db: D1Database, email: string): Promise<{
   subscribed: boolean;
+  name: string | null;
   unsubscribed_at: number | null;
   subscribed_at: number | null;
   confirmed_at: number | null;
@@ -153,7 +155,7 @@ export async function getSubscriptionStatus(db: D1Database, email: string): Prom
 } | null> {
   try {
     const result = await db.prepare(
-      'SELECT subscribed_at, unsubscribed_at, confirmed_at, confirm_token FROM subscriptions WHERE email = ?'
+      'SELECT name, subscribed_at, unsubscribed_at, confirmed_at, confirm_token FROM subscriptions WHERE email = ?'
     ).bind(email).first<SubscriptionRecord>();
 
     if (!result) {
@@ -162,6 +164,7 @@ export async function getSubscriptionStatus(db: D1Database, email: string): Prom
 
     return {
       subscribed: result.unsubscribed_at === null,
+      name: result.name,
       unsubscribed_at: result.unsubscribed_at,
       subscribed_at: result.subscribed_at,
       confirmed_at: result.confirmed_at,
