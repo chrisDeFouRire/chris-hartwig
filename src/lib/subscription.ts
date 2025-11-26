@@ -1,5 +1,3 @@
-import { randomBytes } from 'crypto';
-
 // Helper to validate email format
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -7,7 +5,9 @@ export function isValidEmail(email: string): boolean {
 
 // Helper to generate a random confirmation token
 export function generateConfirmationToken(): string {
-  return randomBytes(32).toString('hex');
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 // Custom error types for subscription operations
