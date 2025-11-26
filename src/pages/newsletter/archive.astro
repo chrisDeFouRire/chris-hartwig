@@ -1,65 +1,100 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const allBlogPosts = await getCollection('blog');
-const newsletterIssues = allBlogPosts.filter(post =>
-  post.data.tags?.includes('newsletter')
-).sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+const allBlogPosts = await getCollection("blog");
+const newsletterIssues = allBlogPosts
+  .filter((post) => post.data.tags?.includes("newsletter"))
+  .sort(
+    (a, b) =>
+      new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+  );
 
 // If no newsletter posts exist yet, get all posts
-const allPosts = await getCollection('blog');
-const recentPosts = allPosts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()).slice(0, 10);
+const allPosts = await getCollection("blog");
+const recentPosts = allPosts
+  .sort(
+    (a, b) =>
+      new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+  )
+  .slice(0, 10);
 
 // Use newsletter-specific posts if available, otherwise fallback to all posts
 const issues = newsletterIssues.length > 0 ? newsletterIssues : recentPosts;
 ---
 
-<BaseLayout title="Newsletter Archives | Vibe Software Engineering" description="Past issues of the Vibe Software Engineering newsletter">
+<BaseLayout
+  title="Newsletter Archives | Vibe Software Engineering"
+  description="Past issues of the Vibe Software Engineering newsletter"
+>
   <section class="section">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
         <h1 class="text-3xl md:text-4xl font-bold mb-4">Newsletter Archives</h1>
         <p class="text-xl text-gray-600">
-          Browse past issues of the Vibe Software Engineering newsletter featuring insights on AI in software development.
+          Browse past issues of the Vibe Software Engineering newsletter
+          featuring insights on AI in software development.
         </p>
       </div>
 
       <div class="space-y-6">
-        {issues.map((issue) => (
-          <article class="card p-6 hover:shadow-md transition-shadow">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-3">
-                  {issue.data.tags?.includes('newsletter') ? 'Newsletter Issue' : 'Blog Post'}
-                </div>
-                <h2 class="text-xl font-bold mb-2">
-                  <a href={`/blog/${issue.slug}`} class="text-gray-900 hover:text-primary">
-                    {issue.data.title}
-                  </a>
-                </h2>
-                <p class="text-gray-600 mb-4">{issue.data.description}</p>
+        {
+          issues.map((issue) => (
+            <article class="card p-6 hover:shadow-md transition-shadow">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-3">
+                    {issue.data.tags?.includes("newsletter")
+                      ? "Newsletter Issue"
+                      : "Blog Post"}
+                  </div>
+                  <h2 class="text-xl font-bold mb-2">
+                    <a
+                      href={`/blog/${issue.slug}/`}
+                      class="text-gray-900 hover:text-primary"
+                    >
+                      {issue.data.title}
+                    </a>
+                  </h2>
+                  <p class="text-gray-600 mb-4">{issue.data.description}</p>
 
-                <div class="flex items-center text-sm text-gray-500">
-                  <span>{new Date(issue.data.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  <span class="mx-2">•</span>
-                  <span>{Math.ceil(issue.body.length / 1000)} min read</span>
+                  <div class="flex items-center text-sm text-gray-500">
+                    <span>
+                      {new Date(issue.data.pubDate).toLocaleDateString(
+                        "en-US",
+                        { year: "numeric", month: "long", day: "numeric" }
+                      )}
+                    </span>
+                    <span class="mx-2">•</span>
+                    <span>{Math.ceil(issue.body.length / 1000)} min read</span>
+                  </div>
                 </div>
+                <a
+                  href={`/blog/${issue.slug}/`}
+                  class="ml-4 text-primary font-medium flex-shrink-0"
+                >
+                  Read →
+                </a>
               </div>
-              <a href={`/blog/${issue.slug}`} class="ml-4 text-primary font-medium flex-shrink-0">
-                Read →
-              </a>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))
+        }
       </div>
 
       <div class="mt-12 text-center">
-        <a href="/newsletter" class="btn-primary inline-flex items-center">
+        <a href="/newsletter/" class="btn-primary inline-flex items-center">
           Subscribe to Future Issues
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 ml-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+            ></path>
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+            ></path>
           </svg>
         </a>
       </div>

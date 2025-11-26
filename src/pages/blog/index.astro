@@ -29,7 +29,7 @@ const blogPosts = await getCollection("blog");
                 <div>
                   <h2 class="text-xl font-bold mb-2">
                     <a
-                      href={`/blog/${post.slug}`}
+                      href={`/blog/${post.slug}/`}
                       class="text-gray-900 hover:text-primary"
                     >
                       {post.data.title}
@@ -52,7 +52,7 @@ const blogPosts = await getCollection("blog");
                   </div>
                 </div>
                 <a
-                  href={`/blog/${post.slug}`}
+                  href={`/blog/${post.slug}/`}
                   class="ml-4 text-primary font-medium flex-shrink-0"
                 >
                   Read →
@@ -65,7 +65,7 @@ const blogPosts = await getCollection("blog");
 
       <div class="mt-12 text-center">
         <a
-          href="/newsletter"
+          href="/newsletter/"
           class="btn-primary inline-flex items-center px-5 py-3 no-underline"
         >
           Subscribe for Weekly Updates
