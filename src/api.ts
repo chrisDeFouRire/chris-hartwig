@@ -39,12 +39,16 @@ async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken
       To: email,
       Subject: 'Confirm your email subscription',
       HtmlBody: `
-        <h2>Welcome to the newsletter!</h2>
+        <h2>Welcome to the Vibe Software Engineering newsletter!</h2>
+        <br/>
         <p>Please click the link below to confirm your email address:</p>
         <p><a href="${confirmUrl}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
-        <p>If you didn't sign up for our newsletter, please ignore this email.</p>
+        <br/>
+        <p>If you didn't sign up for our newsletter, please ignore this email.</p>  
       `,
-      TextBody: `Welcome to the newsletter! Please click the following link to confirm your email address: ${confirmUrl}\n\nIf you didn't sign up for our newsletter, please ignore this email.`
+      TextBody: `Welcome to the Vibe Software Engineering newsletter!
+      \n\nPlease click the following link to confirm your email address: ${confirmUrl}
+      \n\nIf you didn't sign up for our newsletter, please ignore this email.`
     });
     console.log('Email sent successfully, result:', result);
   } catch (error) {

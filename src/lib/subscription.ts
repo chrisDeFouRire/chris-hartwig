@@ -48,15 +48,15 @@ export class InternalError extends SubscriptionError {
 
 export interface ExistingSubscription {
   id: number;
-  unsubscribed_at: string | null;
+  unsubscribed_at: number | null;
 }
 
 export interface SubscriptionRecord {
   id: number;
   email: string;
-  subscribed_at: string | null;
-  unsubscribed_at: string | null;
-  confirmed_at: string | null;
+  subscribed_at: number | null;
+  unsubscribed_at: number | null;
+  confirmed_at: number | null;
   confirm_token: string | null;
 }
 
@@ -69,7 +69,7 @@ export async function subscribe(db: D1Database, email: string): Promise<void> {
     throw new ValidationError('Invalid email address');
   }
 
-  const now = new Date().toISOString();
+  const now = Math.floor(Date.now() / 1000);
   const confirmToken = generateConfirmationToken();
 
   // Check if already subscribed or unsubscribed
@@ -123,7 +123,7 @@ export async function unsubscribe(db: D1Database, email: string): Promise<void> 
   }
 
   try {
-    const now = new Date().toISOString();
+    const now = Math.floor(Date.now() / 1000);
 
     // Perform the actual unsubscribe operation
     const result = await db.prepare(
@@ -146,9 +146,9 @@ export async function unsubscribe(db: D1Database, email: string): Promise<void> 
  */
 export async function getSubscriptionStatus(db: D1Database, email: string): Promise<{
   subscribed: boolean;
-  unsubscribed_at: string | null;
-  subscribed_at: string | null;
-  confirmed_at: string | null;
+  unsubscribed_at: number | null;
+  subscribed_at: number | null;
+  confirmed_at: number | null;
   confirm_token: string | null;
 } | null> {
   try {
@@ -163,7 +163,7 @@ export async function getSubscriptionStatus(db: D1Database, email: string): Prom
     return {
       subscribed: result.unsubscribed_at === null,
       unsubscribed_at: result.unsubscribed_at,
-      subscribed_at: result.subscribed_at as string,
+      subscribed_at: result.subscribed_at,
       confirmed_at: result.confirmed_at,
       confirm_token: result.confirm_token
     };
@@ -182,7 +182,7 @@ export async function confirmSubscription(db: D1Database, confirmToken: string):
   }
 
   try {
-    const now = new Date().toISOString();
+    const now = Math.floor(Date.now() / 1000);
 
     // Update the subscription to mark it as confirmed
     const result = await db.prepare(
@@ -209,7 +209,7 @@ export async function isEmailConfirmed(db: D1Database, email: string): Promise<b
   try {
     const result = await db.prepare(
       'SELECT confirmed_at FROM subscriptions WHERE email = ?'
-    ).bind(email).first<{ confirmed_at: string | null }>();
+    ).bind(email).first<{ confirmed_at: number | null }>();
 
     if (!result) {
       return false;
