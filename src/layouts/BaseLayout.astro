@@ -1,16 +1,17 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
+import MobileNavigation from "../components/MobileNavigation";
 
 const {
-  title = 'Vibe Software Engineering',
-  description = 'Exploring AI in Software Engineering',
+  title = "Vibe Software Engineering",
+  description = "Exploring AI in Software Engineering",
   showHeader = true,
   showFooter = true,
-  withContainer = true
+  withContainer = true,
 } = Astro.props;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -36,83 +37,171 @@ const {
     <meta property="twitter:image" content="/og-image.jpg" />
 
     <!-- Preload critical fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body class="min-h-screen flex flex-col">
-    {showHeader && (
-      <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div class="container">
-          <div class="flex items-center justify-between h-16">
-            <a href="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-primary">Chris Hartwig</span>
-              <span class="sr-only">Vibe Software Engineering</span>
-            </a>
+    {
+      showHeader && (
+        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+          <div class="container">
+            <div class="flex items-center justify-between h-16">
+              <div class="flex items-center space-x-2">
+                <a href="/" class="text-xl font-bold text-primary no-underline">
+                  Chris Hartwig
+                </a>
+                <span class="text-lg text-gray-400">
+                  Vibe Software Engineering
+                </span>
+              </div>
 
-            <nav class="hidden md:flex items-center space-x-8">
-              <a href="/" class="text-gray-600 hover:text-primary font-medium">Home</a>
-              <a href="/blog" class="text-gray-600 hover:text-primary font-medium">Blog</a>
-              <a href="/newsletter" class="text-gray-600 hover:text-primary font-medium">Newsletter</a>
-              <a href="/about" class="text-gray-600 hover:text-primary font-medium">About</a>
-            </nav>
-
-            <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-              </svg>
-            </button>
+              <nav class="hidden md:flex items-center space-x-8">
+                <a
+                  href="/"
+                  class="text-gray-600 hover:text-primary font-medium"
+                >
+                  Home
+                </a>
+                <a
+                  href="/blog"
+                  class="text-gray-600 hover:text-primary font-medium"
+                >
+                  Blog
+                </a>
+                <a
+                  href="/newsletter"
+                  class="text-gray-600 hover:text-primary font-medium"
+                >
+                  Newsletter
+                </a>
+                <a
+                  href="/about"
+                  class="text-gray-600 hover:text-primary font-medium"
+                >
+                  About
+                </a>
+              </nav>
+            </div>
           </div>
-        </div>
-      </header>
-    )}
+        </header>
+      )
+    }
 
-    <main class={`${withContainer && 'container'} flex-grow`}>
+    <MobileNavigation client:load />
+
+    <main class={`${withContainer && "container"} flex-grow`}>
       <slot />
     </main>
 
-    {showFooter && (
-      <footer class="border-t border-gray-200 bg-gray-50 mt-16">
-        <div class="container py-12">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="md:col-span-2">
-              <h3 class="text-lg font-bold text-gray-900 mb-4">Vibe Software Engineering</h3>
-              <p class="text-gray-600 max-w-md">
-                Exploring the intersection of AI and Software Engineering.
-                Weekly insights on AI coding tools, techniques, and best practices.
+    {
+      showFooter && (
+        <footer class="border-t border-gray-200 bg-gray-50 mt-16">
+          <div class="container py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div class="md:col-span-2">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">
+                  Vibe Software Engineering
+                </h3>
+                <p class="text-gray-600 max-w-md">
+                  Exploring the intersection of AI and Software Engineering.
+                  Weekly insights on AI coding tools, techniques, and best
+                  practices.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+                  Navigation
+                </h3>
+                <ul class="space-y-2">
+                  <li>
+                    <a href="/" class="text-gray-600 hover:text-primary">
+                      Home
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/blog" class="text-gray-600 hover:text-primary">
+                      Blog
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/newsletter"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      Newsletter
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/about" class="text-gray-600 hover:text-primary">
+                      About
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+                  Connect
+                </h3>
+                <ul class="space-y-2">
+                  <li>
+                    <a
+                      href="https://www.linkedin.com/in/christophe-hartwig-ba228a5/"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      LinkedIn
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://twitter.com/GoneVibing"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      Twitter
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/chrisdefourire"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      GitHub
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/newsletter"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      Subscribe
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
+              <p>
+                &copy; {new Date().getFullYear()} Gone Coding Ltd. All rights
+                reserved.
               </p>
-            </div>
-
-            <div>
-              <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Navigation</h3>
-              <ul class="space-y-2">
-                <li><a href="/" class="text-gray-600 hover:text-primary">Home</a></li>
-                <li><a href="/blog" class="text-gray-600 hover:text-primary">Blog</a></li>
-                <li><a href="/newsletter" class="text-gray-600 hover:text-primary">Newsletter</a></li>
-                <li><a href="/about" class="text-gray-600 hover:text-primary">About</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Connect</h3>
-              <ul class="space-y-2">
-                <li><a href="https://www.linkedin.com/in/christophe-hartwig-ba228a5/" class="text-gray-600 hover:text-primary">LinkedIn</a></li>
-                <li><a href="https://twitter.com/GoneVibing" class="text-gray-600 hover:text-primary">Twitter</a></li>
-                <li><a href="https://github.com/chrisdefourire" class="text-gray-600 hover:text-primary">GitHub</a></li>
-                <li><a href="/newsletter" class="text-gray-600 hover:text-primary">Subscribe</a></li>
-              </ul>
+              <div class="mt-4 md:mt-0">
+                <a href="/privacy" class="mr-4 hover:text-primary">
+                  Privacy Policy
+                </a>
+                <a href="/terms" class="hover:text-primary">
+                  Terms of Service
+                </a>
+              </div>
             </div>
           </div>
-
-          <div class="border-t border-gray-200 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; {new Date().getFullYear()} Gone Coding Ltd. All rights reserved.</p>
-            <div class="mt-4 md:mt-0">
-              <a href="/privacy" class="mr-4 hover:text-primary">Privacy Policy</a>
-              <a href="/terms" class="hover:text-primary">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    )}
+        </footer>
+      )
+    }
   </body>
 </html>

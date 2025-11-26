@@ -1,51 +1,66 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NewsletterForm from "../components/NewsletterForm";
 
 const features = [
   {
     title: "AI Coding Insights",
-    description: "Weekly analysis of how AI is transforming the software development process",
-    icon: "🤖"
+    description:
+      "Weekly analysis of how AI is transforming the software development process",
+    icon: "🤖",
   },
   {
     title: "Practical Tutorials",
-    description: "Hands-on guides for implementing AI tools in your development workflow",
-    icon: "💻"
+    description:
+      "Hands-on guides for implementing AI tools in your development workflow",
+    icon: "💻",
   },
   {
     title: "Industry Trends",
-    description: "Stay updated on the latest developments in AI-assisted programming",
-    icon: "📈"
-  }
+    description:
+      "Stay updated on the latest developments in AI-assisted programming",
+    icon: "📈",
+  },
 ];
 ---
 
-<BaseLayout title="Vibe Software Engineering | AI in Software Development" description="Weekly insights on AI coding tools, techniques, and best practices">
+<BaseLayout
+  title="Vibe Software Engineering | AI in Software Development"
+  description="Weekly insights on AI coding tools, techniques, and best practices"
+>
   <section class="hero">
     <div class="text-center max-w-3xl mx-auto">
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-        Exploring the <span class="text-primary">Future of AI</span> in Software Engineering
+        Exploring the <span class="text-primary">Future of AI</span> in Software
+        Engineering
       </h1>
       <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-        Practical insights, tutorials, and analysis on how AI is transforming the way we write, test, and maintain code.
+        Practical insights, tutorials, and analysis on how AI is transforming
+        the way we write, test, and maintain code.
       </p>
 
       <div class="flex flex-col sm:flex-row justify-center gap-4">
-        <a href="/newsletter" class="btn-primary px-8 py-3 text-lg">Subscribe to Newsletter</a>
-        <a href="/blog" class="btn-secondary px-8 py-3 text-lg">Read Blog</a>
+        <a href="/newsletter" class="btn-primary px-8 py-3 text-lg no-underline"
+          >Subscribe to Newsletter</a
+        >
+        <a href="/blog" class="btn-secondary px-8 py-3 text-lg no-underline"
+          >Past Issues</a
+        >
       </div>
     </div>
   </section>
 
   <section class="section">
     <div class="grid md:grid-cols-3 gap-8">
-      {features.map((feature) => (
-        <div class="card p-6">
-          <div class="text-3xl mb-4">{feature.icon}</div>
-          <h3 class="text-xl font-bold mb-2">{feature.title}</h3>
-          <p class="text-gray-600">{feature.description}</p>
-        </div>
-      ))}
+      {
+        features.map((feature) => (
+          <div class="card p-6">
+            <div class="text-3xl mb-4">{feature.icon}</div>
+            <h3 class="text-xl font-bold mb-2">{feature.title}</h3>
+            <p class="text-gray-600">{feature.description}</p>
+          </div>
+        ))
+      }
     </div>
   </section>
 
@@ -53,25 +68,13 @@ const features = [
     <div class="max-w-4xl mx-auto text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-6">Weekly Newsletter</h2>
       <p class="text-xl text-gray-600 mb-8">
-        Get the latest insights on AI coding tools and techniques delivered straight to your inbox.
+        Get the latest insights on AI coding tools and techniques delivered
+        straight to your inbox.
       </p>
 
       <div class="card max-w-md mx-auto p-6">
         <h3 class="text-lg font-bold mb-4">Join the Community</h3>
-        <form class="space-y-4">
-          <div>
-            <input
-              type="email"
-              placeholder="Your email address"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              required
-            />
-          </div>
-          <button type="submit" class="w-full btn-primary py-3">Subscribe</button>
-        </form>
-        <p class="text-sm text-gray-500 mt-4">
-          No spam. Unsubscribe anytime.
-        </p>
+        <NewsletterForm client:load />
       </div>
     </div>
   </section>

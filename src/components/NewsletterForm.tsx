@@ -1,27 +1,47 @@
 import { useState, type FormEvent } from 'react';
+import ErrorNotification from './form/ErrorNotification';
+import InputField from './form/InputField';
+import CheckboxField from './form/CheckboxField';
+import SubmitButton from './form/SubmitButton';
 
-const NewsletterForm = () => {
+interface NewsletterFormProps {
+  variant?: 'simple' | 'detailed';
+}
+
+const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!email || !agreedToPrivacy) {
+    if (!email || (variant === 'detailed' && !agreedToPrivacy)) {
       return;
     }
 
     setIsSubmitting(true);
 
-    // In a real implementation, you would send this to your backend
     try {
-      console.log('Subscribing:', { email, name });
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          ...(name && { name }) // Only include name if it exists
+        }),
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const data = await response.json() as { message: string };
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to subscribe');
+      }
 
       // Show success feedback
       setIsSubmitted(true);
@@ -32,88 +52,78 @@ const NewsletterForm = () => {
         setName('');
         setAgreedToPrivacy(false);
         setIsSubmitting(false);
-        setIsSubmitted(true);
 
         // Reset submission state after a while
         setTimeout(() => {
           setIsSubmitted(false);
         }, 3000);
-      }, 3000);
+      }, 500);
     } catch (error) {
       console.error('Subscription error:', error);
       setIsSubmitting(false);
+
+      // Set error message for user display
+      setError(error instanceof Error ? error.message : 'An error occurred while subscribing');
+
+      // Clear error after 5 seconds
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email address
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-          required
-          disabled={isSubmitting}
-        />
-      </div>
+      {error && <ErrorNotification message={error} />}
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Name (optional)
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-          disabled={isSubmitting}
-        />
-      </div>
+      <InputField
+        id="email"
+        name="email"
+        label="Email address"
+        type="email"
+        value={email}
+        placeholder="you@example.com"
+        required
+        disabled={isSubmitting}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <div className="flex items-start">
-        <div className="flex items-center h-5">
-          <input
+      {variant === 'detailed' && (
+        <>
+          <InputField
+            id="name"
+            name="name"
+            label="Name"
+            type="text"
+            value={name}
+            placeholder="Your name"
+            disabled={isSubmitting}
+            onChange={(e) => setName(e.target.value)}
+            optional
+          />
+
+          <CheckboxField
             id="privacy"
             name="privacy"
-            type="checkbox"
+            label="I agree to the"
             checked={agreedToPrivacy}
-            onChange={(e) => setAgreedToPrivacy(e.target.checked)}
             required
-            className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
             disabled={isSubmitting}
+            onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+            link={{ href: "/privacy", text: "Privacy Policy" }}
           />
-        </div>
-        <div className="ml-3 text-sm">
-          <label htmlFor="privacy" className="font-medium text-gray-700">
-            I agree to the{' '}
-            <a href="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </a>{' '}
-            and understand that I can unsubscribe at any time.
-          </label>
-        </div>
-      </div>
+        </>
+      )}
 
-      <button
-        type="submit"
-        className={`w-full py-3 text-lg ${isSubmitted
-            ? 'bg-green-500'
-            : 'btn-primary'
-          } ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
-        disabled={isSubmitting || isSubmitted}
-      >
-        {isSubmitting ? 'Subscribing...' : isSubmitted ? 'Subscribed!' : 'Subscribe Now'}
-      </button>
+      <SubmitButton
+        isSubmitting={isSubmitting}
+        isSubmitted={isSubmitted}
+        variant={variant}
+      />
+
+      {variant === 'simple' && (
+        <p className="text-sm text-gray-500 text-center mt-2">No spam. Unsubscribe anytime.</p>
+      )}
     </form>
   );
 };
