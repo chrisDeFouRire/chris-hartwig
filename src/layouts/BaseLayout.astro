@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import MobileNavigation from "../components/MobileNavigation";
+import packageJson from "../../package.json";
 
 const {
   title = "Vibe Software Engineering",
@@ -193,7 +194,7 @@ const {
             <div class="border-t border-gray-200 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
               <p>
                 &copy; {new Date().getFullYear()} Gone Coding Ltd. All rights
-                reserved.
+                reserved. {packageJson.version}
               </p>
               <div class="mt-4 md:mt-0">
                 <a href="/privacy/" class="mr-4 hover:text-primary">
