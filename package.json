@@ -16,7 +16,8 @@
     "lint": "eslint --ext .ts,.tsx,.js,.jsx,.astro --max-warnings=0 src/",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "format": "npx eclint fix src"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.5",

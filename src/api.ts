@@ -44,7 +44,7 @@ async function sendConfirmationEmail(env: WorkerEnv, email: string, confirmToken
         <p>Please click the link below to confirm your email address:</p>
         <p><a href="${confirmUrl}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
         <br/>
-        <p>If you didn't sign up for our newsletter, please ignore this email.</p>  
+        <p>If you didn't sign up for our newsletter, please ignore this email.</p>
       `,
       TextBody: `Welcome to the Vibe Software Engineering newsletter!
       \n\nPlease click the following link to confirm your email address: ${confirmUrl}

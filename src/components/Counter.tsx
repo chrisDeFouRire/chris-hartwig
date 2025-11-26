@@ -11,13 +11,13 @@ export default function Counter({ initialCount = 0 }: CounterProps) {
     <div className="text-center">
       <p className="text-2xl font-semibold mb-4">Count: {count}</p>
       <div className="space-x-4">
-        <button 
+        <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={() => setCount(count + 1)}
         >
           Increment
         </button>
-        <button 
+        <button
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
           onClick={() => setCount(0)}
         >
