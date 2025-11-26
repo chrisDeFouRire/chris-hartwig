@@ -23,6 +23,7 @@
     "@astrojs/mdx": "^4.3.12",
     "astro": "^5.0.0",
     "hono": "^4.10.6",
+    "postmark": "^4.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^5.9.3"

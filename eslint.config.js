@@ -18,6 +18,11 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        // Cloudflare Worker types (from worker-configuration.d.ts)
+        D1Database: 'readonly',
+        D1Result: 'readonly',
+        D1PreparedStatement: 'readonly',
+        Env: 'readonly',
       },
       parser: tsParser,
       parserOptions: {

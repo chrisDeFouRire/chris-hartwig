@@ -9,5 +9,12 @@
   },
   "observability": {
     "enabled": false
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chris-hartwig-newsletter",
+      "database_id": "fc843bb7-bc22-4131-a179-8d0fd34e53ba"
+    }
+  ]
 }

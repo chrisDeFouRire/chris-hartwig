@@ -5,11 +5,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const allBlogPosts = await getCollection('blog');
 const newsletterIssues = allBlogPosts.filter(post =>
   post.data.tags?.includes('newsletter')
-).sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+).sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 
 // If no newsletter posts exist yet, get all posts
 const allPosts = await getCollection('blog');
-const recentPosts = allPosts.sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate)).slice(0, 10);
+const recentPosts = allPosts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()).slice(0, 10);
 
 // Use newsletter-specific posts if available, otherwise fallback to all posts
 const issues = newsletterIssues.length > 0 ? newsletterIssues : recentPosts;

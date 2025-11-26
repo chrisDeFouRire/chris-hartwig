@@ -1,3 +1,8 @@
 // This file helps the LSP recognize Cloudflare Workers types
 // by explicitly using them in a file that's part of src/**
-export type WorkerEnv = Env;
+
+interface IWorkerEnv extends Env {
+  POSTMARK_API_TOKEN: string;
+}
+
+export type WorkerEnv = IWorkerEnv;
