@@ -11,3 +11,15 @@ npx wrangler types
 ```
 
 This will generate the appropriate types automatically in `worker-configuration.d.ts`.
+
+## Database Migrations
+
+⚠️ **IMPORTANT**: Never modify existing migration files. If changes are needed to the database schema, always create a new migration file that applies the necessary changes using ALTER statements or similar.
+
+Modifying existing migration files can cause issues in production environments where those migrations have already been applied. The correct approach is to create a new migration file that builds upon the existing schema.
+
+## Astro Pages and Components
+
+⚠️ **IMPORTANT**: When creating interactive elements in Astro pages, prefer using React components with appropriate client directives (e.g., `client:load`, `client:visible`) rather than client-side scripts.
+
+This approach provides better maintainability, type safety, and follows the project's established patterns for interactive components.

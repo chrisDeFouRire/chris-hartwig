@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ConfirmEmail from '../components/ConfirmEmail.jsx';
+---
+
+<BaseLayout title="Confirming Email" description="Please wait while we verify your subscription">
+  <section class="section">
+    <div class="max-w-md mx-auto text-center">
+      <div class="card p-8">
+        <ConfirmEmail client:only />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

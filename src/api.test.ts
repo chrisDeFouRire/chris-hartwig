@@ -18,6 +18,21 @@ class MockD1Database {
     if (query.includes('SELECT') && query.includes('WHERE email = ?')) {
       const email = bindArgs[0];
       const result = Array.from(this.data.values()).find(sub => sub.email === email);
+      // If the query includes specific fields (like getSubscriptionStatus), return only those
+      if (query.includes('confirmed_at') || query.includes('confirm_token')) {
+        return result ? {
+          subscribed_at: result.subscribed_at,
+          unsubscribed_at: result.unsubscribed_at,
+          confirmed_at: result.confirmed_at,
+          confirm_token: result.confirm_token
+        } : null;
+      }
+      return result || null;
+    }
+    // Handle the confirmation token check
+    if (query.includes('WHERE confirm_token = ?')) {
+      const token = bindArgs[0];
+      const result = Array.from(this.data.values()).find(sub => sub.confirm_token === token);
       return result || null;
     }
     // Generic query that might return an ID or similar if needed in other tests
@@ -33,20 +48,34 @@ class MockD1Database {
   private async executeRun(query: string, bindArgs: any[]): Promise<any> {
     // console.log('MockD1Database.executeRun:', query, bindArgs);
     if (query.includes('INSERT INTO subscriptions')) {
-      const [email, subscribed_at, number_of_issues_received] = bindArgs;
+      const [email, subscribed_at, number_of_issues_received, confirm_token] = bindArgs;
       const id = this.data.size + 1;
       this.data.set(email, {
         id,
         email,
         subscribed_at,
         unsubscribed_at: null,
+        confirmed_at: null,
+        confirm_token: confirm_token || null,
         latest_newsletter_sent: null,
         number_of_issues_received
       });
       return { meta: { changes: 1 } };
     } else if (query.includes('UPDATE subscriptions')) {
       // Logic for UPDATE based on query and bindArgs
-      if (query.includes('SET unsubscribed_at = NULL')) { // Re-subscribe
+      if (query.includes('SET unsubscribed_at = NULL') && query.includes('confirm_token')) { // Re-subscribe with new confirm_token
+        const [subscribed_at_re, confirm_token, email_re] = bindArgs;
+        const existing = this.data.get(email_re);
+        if (existing) {
+          existing.unsubscribed_at = null;
+          existing.subscribed_at = subscribed_at_re;
+          existing.number_of_issues_received = 0;
+          existing.confirmed_at = null; // Reset confirmation when re-subscribing
+          existing.confirm_token = confirm_token; // Update token
+          this.data.set(email_re, existing);
+          return { meta: { changes: 1 } };
+        }
+      } else if (query.includes('SET unsubscribed_at = NULL')) { // Re-subscribe without token (fallback for existing tests)
         const [subscribed_at_re, email_re] = bindArgs;
         const existing = this.data.get(email_re);
         if (existing) {
@@ -56,7 +85,7 @@ class MockD1Database {
           this.data.set(email_re, existing);
           return { meta: { changes: 1 } };
         }
-      } else if (query.includes('SET unsubscribed_at = ?')) { // Unsubscribe
+      } else if (query.includes('SET unsubscribed_at = ?') && query.includes('AND unsubscribed_at IS NULL')) { // Unsubscribe
         const [unsubscribed_at, email] = bindArgs;
         const existing = this.data.get(email);
         if (existing && existing.unsubscribed_at === null) { // Only unsubscribe if not already unsubscribed
@@ -64,6 +93,20 @@ class MockD1Database {
           this.data.set(email, existing);
           return { meta: { changes: 1 } };
         }
+      } else if (query.includes('SET confirmed_at = ?') && query.includes('confirm_token = ?') && query.includes('confirmed_at IS NULL')) {
+        // Confirm subscription
+        const [confirmed_at, confirm_token] = bindArgs;
+        // Find the record by confirmation token
+        const entries = Array.from(this.data.entries());
+        for (const [email, record] of entries) {
+          if (record.confirm_token === confirm_token && record.confirmed_at === null) {
+            record.confirmed_at = confirmed_at;
+            record.confirm_token = null; // Remove token after confirmation
+            this.data.set(email, record);
+            return { meta: { changes: 1 } };
+          }
+        }
+        return { meta: { changes: 0 } };
       }
       return { meta: { changes: 0 } };
     }
@@ -100,6 +143,7 @@ class MockD1Database {
 const mockEnv: WorkerEnv = {
   DB: new MockD1Database() as any, // Cast to any because MockD1Database doesn't fully implement D1Database interface
   POSTMARK_API_TOKEN: 'mock-postmark-token',
+  CANONICAL_URL: 'https://test.com',
   ASSETS: {
     fetch: vi.fn(),
     connect: vi.fn(),
@@ -107,13 +151,11 @@ const mockEnv: WorkerEnv = {
 };
 
 // Mock the postmark client to prevent actual email sending
-vi.mock('postmark', () => {
-  return {
-    ServerClient: vi.fn(() => ({
-      sendEmail: vi.fn(),
-    })),
-  };
-});
+vi.mock('postmark', () => ({
+  ServerClient: class {
+    sendEmail = vi.fn().mockResolvedValue({});
+  },
+}));
 
 describe('Newsletter API', () => {
   let mockDB: MockD1Database;
@@ -275,5 +317,99 @@ describe('Newsletter API', () => {
     const res = await api.fetch(req3, mockEnv); // Second unsubscribe
     expect(res.status).toBe(409);
     expect(await res.json()).toEqual({ message: 'Email already unsubscribed' });
+  });
+
+  it('should confirm email subscription with valid token', async () => {
+    // First subscribe to create a subscription with a confirmation token
+    const req1 = new Request('http://localhost/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'confirm@example.com' }),
+    });
+    const res1 = await api.fetch(req1, mockEnv);
+    expect(res1.status).toBe(200);
+
+    // Get the subscription to retrieve the confirmation token
+    const subscription = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('confirm@example.com').first();
+    expect(subscription).not.toBeNull();
+    expect(subscription.confirm_token).not.toBeNull();
+    expect(subscription.confirmed_at).toBeNull();
+
+    // Now confirm the subscription with the token
+    const req2 = new Request('http://localhost/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: subscription.confirm_token }),
+    });
+    const res2 = await api.fetch(req2, mockEnv);
+    expect(res2.status).toBe(200);
+    expect(await res2.json()).toEqual({ message: 'Email confirmed successfully' });
+
+    // Check that the subscription is now confirmed
+    const updatedSubscription = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('confirm@example.com').first();
+    expect(updatedSubscription).not.toBeNull();
+    expect(updatedSubscription.confirmed_at).not.toBeNull();
+    expect(updatedSubscription.confirm_token).toBeNull();
+  });
+
+  it('should return 404 for invalid confirmation token', async () => {
+    const req = new Request('http://localhost/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: 'invalid-token' }),
+    });
+    const res = await api.fetch(req, mockEnv);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ message: 'Invalid or expired confirmation token' });
+  });
+
+  it('should return 400 for missing confirmation token', async () => {
+    const req = new Request('http://localhost/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const res = await api.fetch(req, mockEnv);
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ message: 'Confirmation token is required' });
+  });
+
+  it('should not confirm with already used token', async () => {
+    // First subscribe to create a subscription with a confirmation token
+    const req1 = new Request('http://localhost/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'already-confirmed@example.com' }),
+    });
+    const res1 = await api.fetch(req1, mockEnv);
+    expect(res1.status).toBe(200);
+
+    // Get the subscription to retrieve the confirmation token
+    const subscription = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('already-confirmed@example.com').first();
+    expect(subscription).not.toBeNull();
+    expect(subscription.confirm_token).not.toBeNull();
+    const token = subscription.confirm_token;
+
+    // Confirm the subscription with the token
+    const req2 = new Request('http://localhost/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const res2 = await api.fetch(req2, mockEnv);
+    expect(res2.status).toBe(200);
+
+    // Check that the token was cleared after confirmation
+    const updatedSubscription = await mockDB.prepare('SELECT * FROM subscriptions WHERE email = ?').bind('already-confirmed@example.com').first();
+    expect(updatedSubscription.confirm_token).toBeNull();
+
+    // Try to confirm again with the same token (should be invalid now)
+    const req3 = new Request('http://localhost/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const res3 = await api.fetch(req3, mockEnv);
+    expect(res3.status).toBe(404);
   });
 });

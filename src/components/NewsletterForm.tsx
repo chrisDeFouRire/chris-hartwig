@@ -15,6 +15,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmationSent, setConfirmationSent] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -43,7 +44,8 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         throw new Error(data.message || 'Failed to subscribe');
       }
 
-      // Show success feedback
+      // Show success feedback and that confirmation email has been sent
+      setConfirmationSent(true);
       setIsSubmitted(true);
 
       // Reset form after delay
@@ -56,6 +58,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         // Reset submission state after a while
         setTimeout(() => {
           setIsSubmitted(false);
+          setConfirmationSent(false);
         }, 3000);
       }, 500);
     } catch (error) {
@@ -120,6 +123,14 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         isSubmitted={isSubmitted}
         variant={variant}
       />
+
+      {confirmationSent && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-blue-700 text-sm">
+            Thank you for subscribing! Please check your email to confirm your subscription.
+          </p>
+        </div>
+      )}
 
       {variant === 'simple' && (
         <p className="text-sm text-gray-500 text-center mt-2">No spam. Unsubscribe anytime.</p>
