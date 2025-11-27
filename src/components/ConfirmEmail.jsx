@@ -64,7 +64,7 @@ const ConfirmEmail = () => {
         </div>
         <h2 className="text-2xl font-bold mb-2">Invalid Link</h2>
         <p className="text-gray-700 mb-4">No confirmation token provided. Please check your email for the confirmation link.</p>
-        <a href="/newsletter" className="text-primary hover:underline">Subscribe again</a>
+        <a href="/newsletter/" className="text-primary hover:underline">Subscribe again</a>
       </div>
     );
   }
@@ -93,7 +93,7 @@ const ConfirmEmail = () => {
       </div>
       <h2 className="text-2xl font-bold mb-2">Confirmation Failed</h2>
       <p className="text-gray-700 mb-4">{error}</p>
-      <a href="/newsletter" className="text-primary hover:underline">Subscribe again</a>
+      <a href="/newsletter/" className="text-primary hover:underline">Subscribe again</a>
     </div>
   );
 };

@@ -113,7 +113,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
             required
             disabled={isSubmitting}
             onChange={(e) => setAgreedToPrivacy(e.target.checked)}
-            link={{ href: "/privacy", text: "Privacy Policy" }}
+            link={{ href: "/privacy/", text: "Privacy Policy" }}
           />
         </>
       )}

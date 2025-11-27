@@ -74,21 +74,21 @@ const MobileNavigation: React.FC = () => {
             Home
           </a>
           <a
-            href="/blog"
+            href="/blog/"
             className="px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 font-medium rounded-lg transition-colors duration-200"
             onClick={toggleMenu}
           >
             Blog
           </a>
           <a
-            href="/newsletter"
+            href="/newsletter/"
             className="px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 font-medium rounded-lg transition-colors duration-200"
             onClick={toggleMenu}
           >
             Newsletter
           </a>
           <a
-            href="/about"
+            href="/about/"
             className="px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 font-medium rounded-lg transition-colors duration-200"
             onClick={toggleMenu}
           >
