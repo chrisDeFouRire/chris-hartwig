@@ -94,6 +94,13 @@ const MobileNavigation: React.FC = () => {
           >
             About
           </a>
+          <a
+            href="/resume/"
+            className="px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 font-medium rounded-lg transition-colors duration-200"
+            onClick={toggleMenu}
+          >
+            Resume
+          </a>
         </nav>
       </div>
     </>
