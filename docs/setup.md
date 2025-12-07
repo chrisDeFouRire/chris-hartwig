@@ -21,6 +21,12 @@ CurvaQz ships as an Astro + React front-end bundled for Cloudflare Workers with 
 - `npm run check` → `tsc --noEmit` and `astro check` for type + template validation.
 - `npm run test` → `vitest run` (default config).
 
+## Environment variables (newsletter)
+
+- `TURNSTILE_SITE_KEY` (public): add to `wrangler.jsonc` `vars` or export in your build environment so the React newsletter form can render the widget.
+- `TURNSTILE_SECRET` (private): set via `wrangler secret put TURNSTILE_SECRET` for Turnstile siteverify on `/api/subscribe`.
+- Both values must be present for subscriptions to be accepted; redeploy after updating.
+
 ## Astro + React
 
 - Config: `astro.config.mjs` registers `@astrojs/react` (`integrations: [react()]`).

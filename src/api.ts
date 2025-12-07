@@ -65,6 +65,34 @@ api.get('/health', (c) => {
   return c.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+interface TurnstileVerifyResponse {
+  success: boolean;
+  ['error-codes']?: string[];
+}
+
+async function verifyTurnstileToken(token: string, secret: string, remoteIp?: string | null): Promise<TurnstileVerifyResponse> {
+  const body = new URLSearchParams({
+    secret,
+    response: token,
+  });
+
+  if (remoteIp) {
+    body.append('remoteip', remoteIp);
+  }
+
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body,
+  });
+
+  if (!response.ok) {
+    console.error('Turnstile verification request failed with status:', response.status);
+    return { success: false, 'error-codes': ['network-error'] };
+  }
+
+  return response.json<TurnstileVerifyResponse>();
+}
+
 // Subscribe to newsletter
 api.post('/subscribe', async (c) => {
   let requestBody;
@@ -75,10 +103,27 @@ api.post('/subscribe', async (c) => {
     return c.json({ message: 'Invalid JSON in request body' }, 400);
   }
 
-  const { email, name } = requestBody;
+  const { email, name, turnstileToken } = requestBody;
 
   try {
     console.log('Starting subscription process for email:', email);
+
+    if (!turnstileToken) {
+      return c.json({ message: 'Verification token is required' }, 400);
+    }
+
+    if (!c.env.TURNSTILE_SECRET) {
+      console.error('TURNSTILE_SECRET is not configured');
+      return c.json({ message: 'Verification service unavailable' }, 500);
+    }
+
+    const remoteIp = c.req.header('cf-connecting-ip');
+    const verification = await verifyTurnstileToken(turnstileToken, c.env.TURNSTILE_SECRET, remoteIp);
+
+    if (!verification.success) {
+      console.error('Turnstile verification failed:', verification['error-codes']);
+      return c.json({ message: 'Verification failed' }, 400);
+    }
 
     // Check if email is already subscribed to determine the appropriate message
     const existingSubscription = await c.env.DB.prepare(

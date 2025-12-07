@@ -4,6 +4,7 @@
 interface IWorkerEnv extends Env {
   POSTMARK_API_TOKEN: string;
   CANONICAL_URL: "https://chris-hartwig.com";
+  TURNSTILE_SECRET: string;
 }
 
 export type WorkerEnv = IWorkerEnv;
