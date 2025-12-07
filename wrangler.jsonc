@@ -7,8 +7,7 @@
   ],
   "tsconfig": "tsconfig.json",
   "vars": {
-    "CANONICAL_URL": "https://chris-hartwig.com",
-    "TURNSTILE_SITE_KEY": "0x4AAAAAACFK0KVMPVBqHLyc"
+    "CANONICAL_URL": "https://chris-hartwig.com"
   },
   "assets": {
     "binding": "ASSETS",

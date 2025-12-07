@@ -34,15 +34,9 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const widgetContainerIdRef = useRef(`turnstile-widget-${Math.random().toString(36).slice(2)}`);
   const widgetContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const siteKey = (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
-    (import.meta.env.TURNSTILE_SITE_KEY as string | undefined);
+  const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string;
 
   useEffect(() => {
-    if (!siteKey) {
-      setError('Verification is unavailable right now. Please try again later.');
-      return;
-    }
-
     const existingScript = document.querySelector(
       'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
     ) as HTMLScriptElement | null;
@@ -80,7 +74,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   }, [siteKey]);
 
   useEffect(() => {
-    if (!turnstileReady || !siteKey || !window.turnstile) {
+    if (!turnstileReady || !window.turnstile) {
       return;
     }
 
@@ -140,11 +134,6 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
     e.preventDefault();
 
     if (!email || (variant === 'detailed' && !agreedToPrivacy)) {
-      return;
-    }
-
-    if (!siteKey) {
-      setError('Verification is unavailable right now. Please try again later.');
       return;
     }
 
@@ -211,8 +200,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const canSubmit =
     Boolean(email) &&
     (!variant || variant === 'simple' || agreedToPrivacy) &&
-    Boolean(turnstileToken) &&
-    Boolean(siteKey);
+    Boolean(turnstileToken);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -263,11 +251,6 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
           ref={widgetContainerRef}
           className="w-full"
         />
-        {!siteKey && (
-          <p className="text-sm text-red-600 mt-2">
-            Missing Turnstile site key. Please try again later.
-          </p>
-        )}
       </div>
 
       <SubmitButton
