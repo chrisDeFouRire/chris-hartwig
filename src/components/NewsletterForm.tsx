@@ -32,8 +32,10 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
 
   const widgetIdRef = useRef<string | null>(null);
   const widgetContainerIdRef = useRef(`turnstile-widget-${Math.random().toString(36).slice(2)}`);
+  const widgetContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const siteKey = import.meta.env.TURNSTILE_SITE_KEY as string | undefined;
+  const siteKey = (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
+    (import.meta.env.TURNSTILE_SITE_KEY as string | undefined);
 
   useEffect(() => {
     if (!siteKey) {
@@ -49,6 +51,8 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
     const handleScriptError = () => setError('Failed to load verification. Please refresh.');
 
     if (existingScript) {
+      existingScript.async = false;
+      existingScript.defer = false;
       if (window.turnstile) {
         setTurnstileReady(true);
       } else {
@@ -63,8 +67,8 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
 
     const script = document.createElement('script');
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    script.async = true;
-    script.defer = true;
+    script.async = false;
+    script.defer = false;
     script.onload = handleScriptLoad;
     script.onerror = handleScriptError;
     document.head.appendChild(script);
@@ -80,13 +84,28 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
       return;
     }
 
-    window.turnstile.ready(() => {
-      if (widgetIdRef.current) {
-        window.turnstile.reset(widgetIdRef.current);
+    const turnstile = window.turnstile;
+    if (!turnstile) {
+      return;
+    }
+
+    turnstile.ready(() => {
+      if (!turnstile) {
         return;
       }
 
-      const id = window.turnstile.render(`#${widgetContainerIdRef.current}`, {
+      const containerEl = widgetContainerRef.current;
+      if (!containerEl) {
+        console.warn('Turnstile container not ready');
+        return;
+      }
+
+      if (widgetIdRef.current) {
+        turnstile.reset(widgetIdRef.current);
+        return;
+      }
+
+      const id = turnstile.render(containerEl, {
         sitekey: siteKey,
         callback: (token: string) => {
           setTurnstileToken(token);
@@ -239,7 +258,11 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
       )}
 
       <div className="mt-4">
-        <div id={widgetContainerIdRef.current} className="w-full" />
+        <div
+          id={widgetContainerIdRef.current}
+          ref={widgetContainerRef}
+          className="w-full"
+        />
         {!siteKey && (
           <p className="text-sm text-red-600 mt-2">
             Missing Turnstile site key. Please try again later.

@@ -23,9 +23,10 @@ CurvaQz ships as an Astro + React front-end bundled for Cloudflare Workers with 
 
 ## Environment variables (newsletter)
 
-- `TURNSTILE_SITE_KEY` (public): add to `wrangler.jsonc` `vars` or export in your build environment so the React newsletter form can render the widget.
+- `PUBLIC_TURNSTILE_SITE_KEY` (public build-time): export in your build/CI env so the React newsletter form can render the widget (Astro exposes only `PUBLIC_*` to the client).
+- `TURNSTILE_SITE_KEY` (server/runtime): kept in `wrangler.jsonc` vars for reference; optional if you rely solely on `PUBLIC_TURNSTILE_SITE_KEY` for the client.
 - `TURNSTILE_SECRET` (private): set via `wrangler secret put TURNSTILE_SECRET` for Turnstile siteverify on `/api/subscribe`.
-- Both values must be present for subscriptions to be accepted; redeploy after updating.
+- Both the public site key (at build time) and the secret (runtime) must be present for subscriptions to be accepted; redeploy after updating.
 
 ## Astro + React
 
