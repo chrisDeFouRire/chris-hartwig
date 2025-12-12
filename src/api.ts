@@ -108,21 +108,23 @@ api.post('/subscribe', async (c) => {
   try {
     console.log('Starting subscription process for email:', email);
 
-    if (!turnstileToken) {
-      return c.json({ message: 'Verification token is required' }, 400);
-    }
+    // Skip Turnstile verification in local development when TURNSTILE_SECRET is not set
+    const isLocalDev = !c.env.TURNSTILE_SECRET;
+    
+    if (!isLocalDev) {
+      if (!turnstileToken) {
+        return c.json({ message: 'Verification token is required' }, 400);
+      }
 
-    if (!c.env.TURNSTILE_SECRET) {
-      console.error('TURNSTILE_SECRET is not configured');
-      return c.json({ message: 'Verification service unavailable' }, 500);
-    }
+      const remoteIp = c.req.header('cf-connecting-ip');
+      const verification = await verifyTurnstileToken(turnstileToken, c.env.TURNSTILE_SECRET, remoteIp);
 
-    const remoteIp = c.req.header('cf-connecting-ip');
-    const verification = await verifyTurnstileToken(turnstileToken, c.env.TURNSTILE_SECRET, remoteIp);
-
-    if (!verification.success) {
-      console.error('Turnstile verification failed:', verification['error-codes']);
-      return c.json({ message: 'Verification failed' }, 400);
+      if (!verification.success) {
+        console.error('Turnstile verification failed:', verification['error-codes']);
+        return c.json({ message: 'Verification failed' }, 400);
+      }
+    } else {
+      console.log('Skipping Turnstile verification (local development mode)');
     }
 
     // Check if email is already subscribed to determine the appropriate message

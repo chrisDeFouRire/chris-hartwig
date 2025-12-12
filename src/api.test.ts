@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import api from './api'; // Import the Hono app
 import type { WorkerEnv } from './types/worker';
+
+const VALID_TURNSTILE_TOKEN = 'mock-turnstile-token';
+const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 // Mock D1Database
 class MockD1Database {
@@ -159,12 +162,13 @@ const mockEnv: WorkerEnv = {
   DB: new MockD1Database() as any, // Cast to any because MockD1Database doesn't fully implement D1Database interface
   POSTMARK_API_TOKEN: 'mock-postmark-token',
   TURNSTILE_SECRET: 'mock-turnstile-secret',
-  TURNSTILE_SITE_KEY: '0x4AAAAAACFK0KVMPVBqHLyc',
+  PUBLIC_TURNSTILE_SITE_KEY: '0x4AAAAAACFK0KVMPVBqHLyc',
   CANONICAL_URL: 'https://chris-hartwig.com' as const,
   ASSETS: {
     fetch: vi.fn(),
     connect: vi.fn(),
   },
+  SEND_NEWSLETTER_WORKFLOW: {} as unknown as Workflow,
 };
 
 // Mock the postmark client to prevent actual email sending
@@ -181,13 +185,32 @@ describe('Newsletter API', () => {
     // Reset the mock database before each test
     mockDB = new MockD1Database();
     mockEnv.DB = mockDB as any;
+
+    // Turnstile verification is required by /subscribe, so stub it as successful by default.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === TURNSTILE_VERIFY_URL) {
+          return new Response(JSON.stringify({ success: true }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+        throw new Error(`Unexpected fetch in test: ${url}`);
+      })
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should subscribe a new email successfully', async () => {
     const req = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test@example.com' }),
+      body: JSON.stringify({ email: 'test@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res = await api.fetch(req, mockEnv);
     expect(res.status).toBe(200);
@@ -202,7 +225,7 @@ describe('Newsletter API', () => {
     const req = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test-with-name@example.com', name: 'John Doe' }),
+      body: JSON.stringify({ email: 'test-with-name@example.com', name: 'John Doe', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res = await api.fetch(req, mockEnv);
     expect(res.status).toBe(200);
@@ -218,7 +241,7 @@ describe('Newsletter API', () => {
     const req = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'invalid-email' }),
+      body: JSON.stringify({ email: 'invalid-email', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res = await api.fetch(req, mockEnv);
     expect(res.status).toBe(400);
@@ -230,7 +253,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test@example.com' }),
+      body: JSON.stringify({ email: 'test@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     await api.fetch(req1, mockEnv);
 
@@ -238,7 +261,7 @@ describe('Newsletter API', () => {
     const req2 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test@example.com' }),
+      body: JSON.stringify({ email: 'test@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res = await api.fetch(req2, mockEnv);
     expect(res.status).toBe(409);
@@ -250,7 +273,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'resubscribe@example.com' }),
+      body: JSON.stringify({ email: 'resubscribe@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     await api.fetch(req1, mockEnv);
 
@@ -258,7 +281,7 @@ describe('Newsletter API', () => {
     const req2 = new Request('http://localhost/unsubscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'resubscribe@example.com' }),
+      body: JSON.stringify({ email: 'resubscribe@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     await api.fetch(req2, mockEnv);
 
@@ -269,7 +292,7 @@ describe('Newsletter API', () => {
     const req3 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'resubscribe@example.com' }),
+      body: JSON.stringify({ email: 'resubscribe@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res = await api.fetch(req3, mockEnv);
     expect(res.status).toBe(200);
@@ -284,7 +307,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'unsubscribe@example.com' }),
+      body: JSON.stringify({ email: 'unsubscribe@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     await api.fetch(req1, mockEnv);
 
@@ -329,7 +352,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'alreadyunsubscribed@example.com' }),
+      body: JSON.stringify({ email: 'alreadyunsubscribed@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     await api.fetch(req1, mockEnv);
 
@@ -357,7 +380,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'confirm@example.com' }),
+      body: JSON.stringify({ email: 'confirm@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res1 = await api.fetch(req1, mockEnv);
     expect(res1.status).toBe(200);
@@ -412,7 +435,7 @@ describe('Newsletter API', () => {
     const req1 = new Request('http://localhost/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'already-confirmed@example.com' }),
+      body: JSON.stringify({ email: 'already-confirmed@example.com', turnstileToken: VALID_TURNSTILE_TOKEN }),
     });
     const res1 = await api.fetch(req1, mockEnv);
     expect(res1.status).toBe(200);

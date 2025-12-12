@@ -34,9 +34,17 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const widgetContainerIdRef = useRef(`turnstile-widget-${Math.random().toString(36).slice(2)}`);
   const widgetContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string;
+  const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
+  const isLocalDev = !siteKey;
 
   useEffect(() => {
+    // Skip loading Turnstile in local development when site key is not set
+    if (isLocalDev) {
+      console.log('Skipping Turnstile widget (local development mode)');
+      setTurnstileReady(true); // Set ready so form can submit
+      return;
+    }
+
     const existingScript = document.querySelector(
       'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
     ) as HTMLScriptElement | null;
@@ -71,9 +79,14 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
       script.onload = null;
       script.onerror = null;
     };
-  }, [siteKey]);
+  }, [siteKey, isLocalDev]);
 
   useEffect(() => {
+    // Skip rendering Turnstile widget in local development
+    if (isLocalDev) {
+      return;
+    }
+
     if (!turnstileReady || !window.turnstile) {
       return;
     }
@@ -121,7 +134,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         widgetIdRef.current = null;
       }
     };
-  }, [turnstileReady, siteKey]);
+  }, [turnstileReady, siteKey, isLocalDev]);
 
   const resetTurnstile = () => {
     if (widgetIdRef.current && window.turnstile) {
@@ -137,7 +150,8 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
       return;
     }
 
-    if (!turnstileToken) {
+    // Skip Turnstile token check in local development
+    if (!isLocalDev && !turnstileToken) {
       setError('Please complete the verification challenge.');
       return;
     }
@@ -153,7 +167,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         body: JSON.stringify({
           email,
           ...(name && { name }), // Only include name if it exists
-          turnstileToken,
+          ...(!isLocalDev && { turnstileToken }), // Only include token if not in local dev
         }),
       });
 
@@ -200,7 +214,7 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
   const canSubmit =
     Boolean(email) &&
     (!variant || variant === 'simple' || agreedToPrivacy) &&
-    Boolean(turnstileToken);
+    (isLocalDev || Boolean(turnstileToken));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -245,13 +259,15 @@ const NewsletterForm = ({ variant = 'detailed' }: NewsletterFormProps) => {
         </>
       )}
 
-      <div className="mt-4">
-        <div
-          id={widgetContainerIdRef.current}
-          ref={widgetContainerRef}
-          className="w-full"
-        />
-      </div>
+      {!isLocalDev && (
+        <div className="mt-4">
+          <div
+            id={widgetContainerIdRef.current}
+            ref={widgetContainerRef}
+            className="w-full"
+          />
+        </div>
+      )}
 
       <SubmitButton
         isSubmitting={isSubmitting}

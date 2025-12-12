@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import type { WorkerEnv } from './types/worker';
 import api from './api';
+// Export workflow entrypoints so Wrangler can bind them (required for Workflows)
+export { SendNewsletterIssue } from './workflows/SendNewsletterIssue';
 
 // Create the main Hono app
 const app = new Hono<{ Bindings: WorkerEnv; }>();
