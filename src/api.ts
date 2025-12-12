@@ -117,7 +117,8 @@ api.post('/subscribe', async (c) => {
       }
 
       const remoteIp = c.req.header('cf-connecting-ip');
-      const verification = await verifyTurnstileToken(turnstileToken, c.env.TURNSTILE_SECRET, remoteIp);
+      // TypeScript doesn't narrow the type, but we know TURNSTILE_SECRET exists because !isLocalDev
+      const verification = await verifyTurnstileToken(turnstileToken, c.env.TURNSTILE_SECRET!, remoteIp);
 
       if (!verification.success) {
         console.error('Turnstile verification failed:', verification['error-codes']);

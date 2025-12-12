@@ -162,13 +162,12 @@ const mockEnv: WorkerEnv = {
   DB: new MockD1Database() as any, // Cast to any because MockD1Database doesn't fully implement D1Database interface
   POSTMARK_API_TOKEN: 'mock-postmark-token',
   TURNSTILE_SECRET: 'mock-turnstile-secret',
-  PUBLIC_TURNSTILE_SITE_KEY: '0x4AAAAAACFK0KVMPVBqHLyc',
   CANONICAL_URL: 'https://chris-hartwig.com' as const,
   ASSETS: {
     fetch: vi.fn(),
     connect: vi.fn(),
   },
-  SEND_NEWSLETTER_WORKFLOW: {} as unknown as Workflow,
+  SEND_NEWSLETTER_WORKFLOW: {} as any, // Workflow type is not available in test environment
 };
 
 // Mock the postmark client to prevent actual email sending
