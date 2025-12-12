@@ -29,6 +29,7 @@ const issueNumber = post.data.issueNumber || 'N/A';
     pubDate={post.data.pubDate}
     author={post.data.author}
     issueNumber={issueNumber}
+    image={post.data.image}
   >
     <article class="prose prose-lg max-w-none">
       <Content.Content />
@@ -41,6 +42,7 @@ const issueNumber = post.data.issueNumber || 'N/A';
     pubDate={post.data.pubDate}
     author={post.data.author}
     readingTime={Math.ceil(post.body.length / 1000)}
+    image={post.data.image}
   >
     <article class="prose prose-lg max-w-none">
       <Content.Content />

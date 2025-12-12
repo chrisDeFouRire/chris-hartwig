@@ -1,10 +1,19 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 
-const { title, description, pubDate, author = 'Chris Hartwig', readingTime } = Astro.props;
+const { title, description, pubDate, author = 'Chris Hartwig', readingTime, image } = Astro.props;
+
+const siteUrl = Astro.site?.href || 'https://chris-hartwig.com';
+const ogImage = image 
+  ? `${siteUrl}${encodeURI(image)}` 
+  : `${siteUrl}/og-image.jpg`;
 ---
 
-<BaseLayout title={`${title} | Vibe Software Engineering`} description={description}>
+<BaseLayout 
+  title={`${title} | Vibe Software Engineering`} 
+  description={description}
+  ogImage={ogImage}
+>
   <article class="max-w-3xl mx-auto py-8 md:py-16">
     <header class="mb-10">
       <div class="text-sm text-gray-500 mb-2">

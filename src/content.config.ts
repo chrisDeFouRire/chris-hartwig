@@ -9,6 +9,7 @@ const blog = defineCollection({
     author: z.string().default('Chris Hartwig'),
     tags: z.array(z.string()).optional(),
     issueNumber: z.number().optional(),
+    image: z.string().optional(),
   }),
 });
 

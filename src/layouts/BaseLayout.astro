@@ -9,7 +9,12 @@ const {
   showHeader = true,
   showFooter = true,
   withContainer = true,
+  ogImage = "/og-image.jpg",
 } = Astro.props;
+
+const siteUrl = Astro.site?.href || 'https://chris-hartwig.com';
+const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+const fullUrl = Astro.url.href;
 ---
 
 <!doctype html>
@@ -26,17 +31,17 @@ const {
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://gonecoding.dev/" />
+    <meta property="og:url" content={fullUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image" content={fullOgImage} />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://gonecoding.dev/" />
+    <meta property="twitter:url" content={fullUrl} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content="/og-image.jpg" />
+    <meta property="twitter:image" content={fullOgImage} />
 
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
