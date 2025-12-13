@@ -3,8 +3,10 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  // Filter posts that have an issueNumber
-  const newsletterPosts = posts.filter((post) => post.data.issueNumber !== undefined);
+  // Filter posts that have an issueNumber and are not drafts
+  const newsletterPosts = posts.filter(
+    (post) => post.data.issueNumber !== undefined && !post.data.draft
+  );
 
   return newsletterPosts.map((post) => {
     return {

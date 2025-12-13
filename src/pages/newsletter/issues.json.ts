@@ -4,9 +4,9 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = async ({ site }) => {
   const posts = await getCollection('blog');
 
-  // Filter posts that have an issueNumber and sort by issueNumber descending
+  // Filter posts that have an issueNumber and are not drafts, then sort by issueNumber descending
   const newsletterPosts = posts
-    .filter((post) => post.data.issueNumber !== undefined)
+    .filter((post) => post.data.issueNumber !== undefined && !post.data.draft)
     .sort((a, b) => {
       const aIssue = a.data.issueNumber ?? 0;
       const bIssue = b.data.issueNumber ?? 0;

@@ -5,12 +5,14 @@ import NewsletterLayout from '../../layouts/NewsletterLayout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map((post) => {
-    return {
-      params: { slug: post.slug },
-      props: { post },
-    };
-  });
+  return posts
+    .filter((post) => !post.data.draft)
+    .map((post) => {
+      return {
+        params: { slug: post.slug },
+        props: { post },
+      };
+    });
 }
 
 const { post } = Astro.props;

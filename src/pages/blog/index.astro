@@ -2,11 +2,13 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const blogPosts = (await getCollection("blog")).sort((a, b) => {
-  const diff = b.data.pubDate.getTime() - a.data.pubDate.getTime();
-  if (diff !== 0) return diff;
-  return a.slug.localeCompare(b.slug);
-});
+const blogPosts = (await getCollection("blog"))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => {
+    const diff = b.data.pubDate.getTime() - a.data.pubDate.getTime();
+    if (diff !== 0) return diff;
+    return a.slug.localeCompare(b.slug);
+  });
 ---
 
 <BaseLayout
