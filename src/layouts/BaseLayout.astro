@@ -28,6 +28,7 @@ const fullUrl = Astro.url.href;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#5a4ae3" />
     <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -203,6 +204,14 @@ const fullUrl = Astro.url.href;
                       class="text-gray-600 hover:text-primary"
                     >
                       Subscribe
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/rss.xml"
+                      class="text-gray-600 hover:text-primary"
+                    >
+                      RSS Feed
                     </a>
                   </li>
                 </ul>

@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const publishedPosts = posts.filter((post) => !post.data.draft);
+
+  // Collect all unique tags
+  const tagSet = new Set<string>();
+  publishedPosts.forEach((post) => {
+    if (post.data.tags) {
+      post.data.tags.forEach((tag) => tagSet.add(tag));
+    }
+  });
+
+  return Array.from(tagSet).map((tag) => ({
+    params: { tag },
+  }));
+}
+
+const { tag } = Astro.params;
+if (!tag) {
+  return Astro.redirect('/blog/tags/');
+}
+
+const posts = await getCollection('blog');
+const taggedPosts = posts
+  .filter((post) => !post.data.draft && post.data.tags?.includes(tag))
+  .sort((a, b) => {
+    const diff = b.data.pubDate.getTime() - a.data.pubDate.getTime();
+    if (diff !== 0) return diff;
+    return a.slug.localeCompare(b.slug);
+  });
+---
+
+<BaseLayout
+  title={`${tag} | Tags`}
+  description={`Articles tagged with ${tag}`}
+>
+  <section class="section">
+    <div class="max-w-4xl mx-auto">
+      <div class="mb-8">
+        <a
+          href="/blog/tags/"
+          class="text-primary hover:underline text-sm font-medium mb-4 inline-block"
+        >
+          ← All Tags
+        </a>
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">
+          Tag: {tag}
+        </h1>
+        <p class="text-gray-600">
+          {taggedPosts.length} {taggedPosts.length === 1 ? 'article' : 'articles'} tagged with{' '}
+          <span class="font-semibold">{tag}</span>
+        </p>
+      </div>
+
+      <div class="space-y-8">
+        {taggedPosts.map((post) => (
+          <article class="card overflow-hidden hover:shadow-md transition-shadow">
+            <a href={`/blog/${post.slug}/`} class="block">
+              <div class="flex flex-col md:flex-row">
+                {post.data.image && (
+                  <div class="md:w-48 md:flex-shrink-0">
+                    <img
+                      src={post.data.image}
+                      alt={post.data.title}
+                      class="w-full h-48 md:h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div class="p-6 flex-1 flex justify-between items-start">
+                  <div class="flex-1">
+                    <h2 class="text-xl font-bold mb-2 text-gray-900 hover:text-primary">
+                      {post.data.title}
+                    </h2>
+                    <p class="text-gray-600 mb-4">{post.data.description}</p>
+
+                    <div class="flex items-center text-sm text-gray-500">
+                      <span>
+                        {new Date(post.data.pubDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </span>
+                      <span class="mx-2">•</span>
+                      <span>{Math.ceil(post.body.length / 1000)} min read</span>
+                    </div>
+                  </div>
+                  <div class="ml-4 text-primary font-medium flex-shrink-0">
+                    Read →
+                  </div>
+                </div>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

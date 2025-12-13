@@ -34,7 +34,7 @@ export class SendNewsletterIssue extends WorkflowEntrypoint<WorkerEnv, Newslette
 
     console.log(`Starting newsletter send for issue ${issueNumber}`, { dryRun, limit });
 
-    // Step 1: Load issue HTML from ASSETS
+    // Step 1: Load issue HTML from ASSETS (email template includes unsubscribe link)
     const htmlContent = await step.do<string>('load-issue-html', async () => {
       const emailPath = `/newsletter/email/${issueNumber}/`;
       const request = new Request(`${this.env.CANONICAL_URL}${emailPath}`);

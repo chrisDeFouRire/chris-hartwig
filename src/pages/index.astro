@@ -5,27 +5,27 @@ import Feature from "../components/Feature";
 ---
 
 <BaseLayout
-  title="AI for SWE | Practical insights on AI coding"
-  description="Practical insights, tutorials, and analysis on how AI is transforming the way we write, test, and maintain code. Weekly newsletter and blog for professionals."
+  title="AI for SWE | Engineering-first newsletter on AI coding"
+  description="Opinionated weekly essays on AI-assisted software engineering: prototyping vs production, security, architecture, tests, maintenance, and the tradeoffs that matter."
 >
   <section class="hero">
     <div class="text-center max-w-3xl mx-auto">
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-        Exploring the Future of<br/><span class="text-primary">AI + SWE</span>
+        AI ships code.<br/><span class="text-primary">You ship software.</span>
       </h1>
       <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-        Practical insights, tutorials, and analysis on how AI is transforming the
-        way we spec, write, test, and maintain code.
+        A weekly, engineering-first newsletter about building with AI without
+        hand-waving the hard parts: intent, architecture, security, and long-term maintenance.
       </p>
 
       <div class="flex flex-col sm:flex-row justify-center gap-4">
         <a
           href="/newsletter/"
           class="btn-primary px-8 py-3 text-lg no-underline"
-          >Subscribe to Newsletter</a
+          >Get the Newsletter</a
         >
         <a href="/blog/" class="btn-secondary px-8 py-3 text-lg no-underline"
-          >Past Issues</a
+          >Read Past Issues</a
         >
       </div>
     </div>
@@ -34,19 +34,34 @@ import Feature from "../components/Feature";
   <section class="section">
     <div class="grid md:grid-cols-3 gap-8">
       <Feature
-        icon="🤖"
-        title="AI Coding Insights"
-        description="Weekly analysis of how AI is transforming the software development process"
+        icon="🧠"
+        title="Intent over artifacts"
+        description="Use AI to explore quickly, then write down intent: decisions, constraints, priorities, and tradeoffs."
       />
       <Feature
-        icon="💻"
-        title="Practical Tutorials"
-        description="Hands-on guides for implementing AI tools in your development workflow"
+        icon="🛠️"
+        title="Lead the AI"
+        description="Conventions, structure, and feedback loops that turn “fast” into “shippable” instead of “fragile”."
       />
       <Feature
-        icon="📈"
-        title="Industry Trends"
-        description="Stay updated on the latest developments in AI-assisted programming"
+        icon="🛡️"
+        title="Responsibility, not magic"
+        description="AI accelerates creation, but it doesn’t own your risk, upgrades, incidents, or long-term maintenance."
+      />
+      <Feature
+        icon="🧱"
+        title="Systems thinking"
+        description="Architecture, boundaries, failure modes, and operational reality—so the software survives contact with prod."
+      />
+      <Feature
+        icon="🧪"
+        title="Reliability loops"
+        description="Tests, observability, and tight iteration cycles that keep AI output honest as the codebase grows."
+      />
+      <Feature
+        icon="🧭"
+        title="Engineering judgment"
+        description="When the default stack is “whatever the model saw most,” you need principles to choose intentionally."
       />
     </div>
   </section>
@@ -55,12 +70,12 @@ import Feature from "../components/Feature";
     <div class="max-w-4xl mx-auto text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-6">Weekly Newsletter</h2>
       <p class="text-xl text-gray-600 mb-8">
-        Get the latest insights on AI coding tools and techniques delivered
-        straight to your inbox.
+        Short, opinionated essays on AI-assisted software engineering—focused on what actually breaks in production,
+        and how to build systems you can own.
       </p>
 
       <div class="card max-w-md mx-auto p-6">
-        <h3 class="text-lg font-bold mb-4">Join the Community</h3>
+        <h3 class="text-lg font-bold mb-4">Subscribe</h3>
         <NewsletterForm client:load />
       </div>
     </div>

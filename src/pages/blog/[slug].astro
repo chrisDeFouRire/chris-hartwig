@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
-import NewsletterLayout from '../../layouts/NewsletterLayout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -17,37 +16,38 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 
+// Get all posts sorted by pubDate for next/prev navigation
+const allPosts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => {
+    const diff = b.data.pubDate.getTime() - a.data.pubDate.getTime();
+    if (diff !== 0) return diff;
+    return a.slug.localeCompare(b.slug);
+  });
+
+// Find current post index
+const currentIndex = allPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+
 // Dynamically import the MDX content
 const Content = await post.render();
 
-const isNewsletter = post.data.tags?.includes('newsletter');
-const issueNumber = post.data.issueNumber || 'N/A';
 ---
 
-{isNewsletter ? (
-  <NewsletterLayout
-    title={post.data.title}
-    description={post.data.description}
-    pubDate={post.data.pubDate}
-    author={post.data.author}
-    issueNumber={issueNumber}
-    image={post.data.image}
-  >
-    <article class="prose prose-lg max-w-none">
-      <Content.Content />
-    </article>
-  </NewsletterLayout>
-) : (
-  <BlogLayout
-    title={post.data.title}
-    description={post.data.description}
-    pubDate={post.data.pubDate}
-    author={post.data.author}
-    readingTime={Math.ceil(post.body.length / 1000)}
-    image={post.data.image}
-  >
-    <article class="prose prose-lg max-w-none">
-      <Content.Content />
-    </article>
-  </BlogLayout>
-)}
+<BlogLayout
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  author={post.data.author}
+  readingTime={Math.ceil(post.body.length / 1000)}
+  image={post.data.image}
+  tags={post.data.tags}
+  issueNumber={post.data.issueNumber}
+  prevPost={prevPost ? { slug: prevPost.slug, title: prevPost.data.title } : null}
+  nextPost={nextPost ? { slug: nextPost.slug, title: nextPost.data.title } : null}
+>
+  <article class="prose prose-lg max-w-none">
+    <Content.Content />
+  </article>
+</BlogLayout>

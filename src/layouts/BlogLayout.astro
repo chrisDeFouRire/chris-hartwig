@@ -1,26 +1,44 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm';
 
-const { title, description, pubDate, author = 'Chris Hartwig', readingTime, image } = Astro.props;
+const { title, description, pubDate, author = 'Chris Hartwig', readingTime, image, tags, prevPost, nextPost, issueNumber } = Astro.props;
 
 const siteUrl = Astro.site?.href || 'https://chris-hartwig.com';
-const ogImage = image 
-  ? `${siteUrl}${encodeURI(image)}` 
+const ogImage = image
+  ? `${siteUrl}${encodeURI(image)}`
   : `${siteUrl}/og-image.jpg`;
 ---
 
-<BaseLayout 
-  title={`${title} | Vibe Software Engineering`} 
+<BaseLayout
+  title={`${title} | Vibe Software Engineering`}
   description={description}
   ogImage={ogImage}
 >
   <article class="max-w-3xl mx-auto py-8 md:py-16">
-    <header class="mb-10">
+    <header class={`mb-10 ${issueNumber ? 'border-b border-gray-200 pb-6' : ''}`}>
+      {issueNumber && (
+        <div class="inline-block px-3 py-1 bg-primary/10 text-primary font-medium rounded-full mb-4">
+          Newsletter Issue #{issueNumber}
+        </div>
+      )}
       <div class="text-sm text-gray-500 mb-2">
         {pubDate && new Date(pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
         {readingTime && ` • ${readingTime} min read`}
       </div>
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{title}</h1>
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-4">
+          {tags.map((tag: string) => (
+            <a
+              href={`/blog/tags/${tag}/`}
+              class="text-sm px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition-colors no-underline"
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      )}
       <div class="flex items-center">
         <div class="text-gray-600">By {author}</div>
       </div>
@@ -30,18 +48,45 @@ const ogImage = image
       <slot />
     </div>
 
-    <footer class="mt-12 pt-8 border-t border-gray-200">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div class="mb-4 md:mb-0">
-          <h3 class="font-bold text-gray-900 mb-2">Liked this post?</h3>
-          <p class="text-gray-600">Subscribe to get the latest AI coding insights delivered weekly.</p>
+    {(prevPost || nextPost) && (
+      <nav class="mt-12 pt-8 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {prevPost ? (
+            <a
+              href={`/blog/${prevPost.slug}/`}
+              class="group p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all no-underline"
+            >
+              <div class="text-sm text-gray-500 mb-1">Previous Post</div>
+              <div class="text-lg font-semibold text-gray-900 group-hover:text-primary">
+                {prevPost.title}
+              </div>
+            </a>
+          ) : (
+            <div></div>
+          )}
+          {nextPost ? (
+            <a
+              href={`/blog/${nextPost.slug}/`}
+              class="group p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all no-underline text-right md:text-left"
+            >
+              <div class="text-sm text-gray-500 mb-1">Next Post</div>
+              <div class="text-lg font-semibold text-gray-900 group-hover:text-primary">
+                {nextPost.title}
+              </div>
+            </a>
+          ) : null}
         </div>
-        <a
-          href="/newsletter/"
-          class="btn-primary inline-flex items-center justify-center px-6 py-3"
-        >
-          Subscribe to Newsletter
-        </a>
+      </nav>
+    )}
+
+    <footer class="mt-12 pt-8 border-t border-gray-200">
+      <div class="bg-gray-50 p-6 rounded-lg">
+        <h3 class="font-bold text-gray-900 mb-2">Liked this post?</h3>
+        <p class="text-gray-600 mb-4">Subscribe to get the latest AI coding insights delivered weekly.</p>
+        <NewsletterForm variant="simple" client:load />
+        <p class="text-xs text-gray-500 mt-3 text-center">
+          Or <a href="/newsletter/" class="text-primary hover:underline">visit the newsletter page</a> for more details.
+        </p>
       </div>
     </footer>
   </article>
