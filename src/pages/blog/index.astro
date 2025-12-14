@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogPostEntry from "../../components/BlogPostEntry.tsx";
 
 const blogPosts = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -28,52 +29,17 @@ const blogPosts = (await getCollection("blog"))
       </div>
 
       <div class="space-y-8">
-        {
-          blogPosts.map((post) => (
-            <article class="card overflow-hidden hover:shadow-md transition-shadow">
-              <div class="flex flex-col md:flex-row">
-                {post.data.image && (
-                  <a href={`/blog/${post.slug}/`} class="md:w-48 md:flex-shrink-0 block">
-                    <img
-                      src={post.data.image}
-                      alt={post.data.title}
-                      class="w-full h-48 md:h-full object-cover"
-                    />
-                  </a>
-                )}
-                <div class="p-6 flex-1">
-                  <div>
-                    <h2 class="text-xl font-bold mb-2">
-                      <a href={`/blog/${post.slug}/`} class="text-gray-900 hover:text-primary">
-                        {post.data.title}
-                      </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">{post.data.description}</p>
-
-                    <div class="flex items-center text-sm text-gray-500">
-                      <span>
-                        {new Date(post.data.pubDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span class="mx-2">•</span>
-                      <span>{Math.ceil(post.body.length / 1000)} min read</span>
-                      <span class="mx-2">•</span>
-                      <span>By {post.data.author}</span>
-                    </div>
-                  </div>
-                  <div class="text-right mt-4">
-                    <a href={`/blog/${post.slug}/`} class="text-primary font-medium inline-block hover:underline">
-                      Read →
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))
-        }
+        {blogPosts.map((post) => (
+          <BlogPostEntry
+            slug={post.slug}
+            title={post.data.title}
+            description={post.data.description}
+            image={post.data.image}
+            pubDate={post.data.pubDate}
+            author={post.data.author}
+            readingTime={Math.ceil(post.body.length / 1000)}
+          />
+        ))}
       </div>
 
       <div class="mt-12 text-center">
